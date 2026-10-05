@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corrupted Land of Heroes - Moogusverse Lore</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Times New Roman', Times, serif !important;
+        }
+
+        body {
+            background-color: #121212;
+            color: #d1d1d1;
+            line-height: 1.8;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background-color: #1e1e1e;
+            border: 1px solid #333333;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(180deg, #2a2a2a 0%, #1e1e1e 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 2px solid #3a3a3a;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: #f0f0f0;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+
+        header p.quote {
+            font-style: italic;
+            color: #a0a0a0;
+            font-size: 1.2rem;
+        }
+
+        /* Navigation Tabs */
+        nav {
+            display: flex;
+            background-color: #181818;
+            border-bottom: 1px solid #333333;
+            overflow-x: auto;
+        }
+
+        .tab-button {
+            background-color: transparent;
+            color: #888888;
+            border: none;
+            outline: none;
+            padding: 15px 18px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+            flex: 1;
+            text-align: center;
+        }
+
+        .tab-button:hover {
+            color: #cccccc;
+            background-color: #222222;
+        }
+
+        .tab-button.active {
+            color: #ffffff;
+            background-color: #262626;
+            border-bottom: 3px solid #888888;
+            font-weight: bold;
+        }
+
+        /* Tab Content */
+        .content-section {
+            display: none;
+            padding: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            font-size: 2rem;
+            color: #e0e0e0;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #444444;
+            padding-bottom: 8px;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            color: #c0c0c0;
+            margin: 20px 0 10px 0;
+        }
+
+        p {
+            margin-bottom: 15px;
+            color: #b8b8b8;
+            text-align: justify;
+        }
+
+        ul {
+            margin: 15px 0 15px 30px;
+            color: #b8b8b8;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .hero-image-container {
+            width: 100%;
+            margin-bottom: 25px;
+            border: 1px solid #3a3a3a;
+            border-radius: 4px;
+            overflow: hidden;
+            background-color: #141414;
+        }
+
+        .hero-image-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+            opacity: 0.85;
+            transition: opacity 0.3s ease;
+        }
+
+        .hero-image-container img:hover {
+            opacity: 1;
+        }
+
+        .hero-image-caption {
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            color: #888888;
+            text-align: center;
+            border-top: 1px solid #2a2a2a;
+            background-color: #181818;
+        }
+
+        .dialogue-box {
+            background-color: #141414;
+            border-left: 4px solid #555555;
+            padding: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #d6d6d6;
+        }
+
+        .region-card {
+            background-color: #242424;
+            border: 1px solid #383838;
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .region-card h3 {
+            margin-top: 0;
+            color: #e0e0e0;
+            border-bottom: 1px dashed #444;
+            padding-bottom: 5px;
+        }
+
+        .ruler-title {
+            font-style: italic;
+            color: #a0a0a0;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #141414;
+            border-top: 1px solid #2a2a2a;
+            color: #666666;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.8rem; }
+            .tab-button { padding: 12px 10px; font-size: 0.85rem; }
+            .content-section { padding: 20px 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Corrupted Land of Heroes</h1>
+        <p class="quote">"The Kingdom Where Heroes Lost Their Virtues."</p>
+    </header>
+
+    <nav>
+        <button class="tab-button active" onclick="openTab(event, 'overview')">Overview</button>
+        <button class="tab-button" onclick="openTab(event, 'history')">History</button>
+        <button class="tab-button" onclick="openTab(event, 'regions')">Regions</button>
+        <button class="tab-button" onclick="openTab(event, 'relationships')">Relationships</button>
+        <button class="tab-button" onclick="openTab(event, 'current-state')">Current State</button>
+    </nav>
+
+    <!-- OVERVIEW -->
+    <div id="overview" class="content-section active">
+        <h2>Overview</h2>
+        
+        <div class="hero-image-container">
+            <img src="https://lh3.googleusercontent.com/pw/AP1GczPlZ8q0ZJ_a6P76qT3J2Z2c9aX-R7A33eZ2Cg60" alt="Corrupted Land of Heroes Concept">
+            <div class="hero-image-caption">Konsep Visual: Corrupted Land of Heroes</div>
+        </div>
+
+        <p>The Corrupted Land of Heroes is a cursed continent located within the western reaches of Moogusverse. Long ago, it was celebrated as the Sanctuary of Virtues, the sacred homeland of the Five Divine Guardians who protected all life.</p>
+        <p>After centuries of betrayal, corruption, and injustice committed by humanity, the guardians slowly abandoned the virtues they once represented. Their divine powers twisted into darker forms, forever changing both themselves and their homeland.</p>
+        <p>The once beautiful kingdom became a land divided into five territories, each reflecting the corrupted heart of its ruler. Forests became haunted, castles lost their light, and even the sky itself no longer remained unchanged.</p>
+        <div class="dialogue-box">
+            Many adventurers have entered the Corrupted Land seeking answers. Very few have ever returned.
+        </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div id="history" class="content-section">
+        <h2>History</h2>
+        
+        <h3>The Age of Virtues</h3>
+        <p>Thousands of years before the present era, the Heart of Creation gave birth to five divine beings:</p>
+        <ul>
+            <li>King of Humility</li>
+            <li>Master of Truth</li>
+            <li>Guardian of Justice</li>
+            <li>Sun of Modesty</li>
+            <li>Queen of Diligence</li>
+        </ul>
+        <p>Together they defeated monsters, ended wars, and protected Moogusverse from extinction. Their homeland was filled with vibrant forests, crystal rivers, peaceful cities, and magnificent temples where people from every kingdom gathered. For many centuries... peace flourished.</p>
+
+        <h3>The Age of Betrayal</h3>
+        <p>As the world grew stronger, humanity slowly forgot who had saved them.</p>
+        <ul>
+            <li>Kings became prideful.</li>
+            <li>Merchants spread lies.</li>
+            <li>Judges accepted corruption.</li>
+            <li>Nature was destroyed.</li>
+            <li>People refused to work while demanding miracles from the guardians.</li>
+        </ul>
+        <p>The Five continued protecting humanity despite receiving only hatred in return. Their virtues slowly weakened. One by one... <em>they fell.</em></p>
+
+        <h3>The Great Corruption</h3>
+        <p>The moment the final guardian lost hope, a massive wave of corrupted energy erupted from the Sanctuary of Virtues. The entire kingdom transformed overnight.</p>
+        <p>Mountains split apart. Forests blackened. Rivers changed color. The sky became permanently unstable.</p>
+        <p>The Sanctuary of Virtues disappeared forever. Its new name became... <strong>Corrupted Land of Heroes</strong>.</p>
+    </div>
+
+    <!-- REGIONS -->
+    <div id="regions" class="content-section">
+        <h2>Regions of the Kingdom</h2>
+
+        <!-- Region 1 -->
+        <div class="region-card">
+            <h3>1. Crimson Palace</h3>
+            <div class="ruler-title">Ruler: King of Pride</div>
+            <p>Once the royal capital where every hero was welcomed, Crimson Palace has become an enormous fortress of red stone and black iron.</p>
+            <p>Its towering walls symbolize absolute superiority, while crimson banners cover every street. Endless statues of the King remind visitors who rules this land. The palace is surrounded by the Crimson River, whose waters were stained red during the Great Corruption.</p>
+            <p>Every citizen living inside must constantly prove their worth. Failure is considered weakness. Weakness deserves exile. Despite its cruel laws, the kingdom remains highly organized and serves as the political center of the Corrupted Land.</p>
+        </div>
+
+        <!-- Region 2 -->
+        <div class="region-card">
+            <h3>2. Spire of Deceit</h3>
+            <div class="ruler-title">Ruler: Master of Deceit</div>
+            <p>The Spire of Deceit resembles a prosperous kingdom at first glance. Beautiful houses. Peaceful streets. Elegant towers. A magnificent central castle.</p>
+            <p>However... almost nothing inside is real. Entire neighborhoods disappear overnight. Roads constantly rearrange themselves. Visitors often walk for hours only to arrive exactly where they started.</p>
+            <p>The great Illusion Castle stands at the center of countless floating mirrors, allowing the Master of Deceit to observe every corner of the city. Nobody knows how many citizens truly live there. Some believe the entire kingdom itself is merely one enormous illusion.</p>
+        </div>
+
+        <!-- Region 3 -->
+        <div class="region-card">
+            <h3>3. Land of Eclipse</h3>
+            <div class="ruler-title">Ruler: Guardian of Silence</div>
+            <p>This region was once the site of the greatest battle in Moogusverse's history. Millions fought there. Almost none survived. The battlefield became so drenched in sorrow that sound itself slowly disappeared.</p>
+            <p>Today... almost complete silence fills the land. Broken weapons remain scattered across the ground. Ruined castles stand frozen in time. Countless forgotten graves stretch across the valley.</p>
+            <p>Above the battlefield hangs an eternal solar eclipse, preventing sunlight from ever reaching the earth below. The Guardian of Silence silently watches over these ruins, believing that no more blood should ever be spilled.</p>
+            <p>Those entering the Land of Eclipse often notice that they cannot hear their own footsteps. Some even lose the ability to speak entirely.</p>
+        </div>
+
+        <!-- Region 4 -->
+        <div class="region-card">
+            <h3>4. Tropical Sun Islands</h3>
+            <div class="ruler-title">Ruler: Sun of Tropicals</div>
+            <p>Unlike the other regions, Tropical Sun Islands remain vibrant and full of life. Golden beaches surround enormous tropical forests. Ancient temples dedicated to the sun rise above waterfalls and colorful jungles.</p>
+            <p>Yet beneath its beauty lies overwhelming arrogance. The Sun of Tropicals believes every flower, tree, and creature exists only because of him.</p>
+            <p>The sun above these islands never fully sets. Heat constantly fills the air. Plants grow at impossible speeds, quickly trapping careless travelers beneath massive vines. Despite its danger, many consider it the most beautiful place in the Corrupted Land.</p>
+        </div>
+
+        <!-- Region 5 -->
+        <div class="region-card">
+            <h3>5. Garden of Dream</h3>
+            <div class="ruler-title">Ruler: Queen of Sloth</div>
+            <p>Surrounded entirely by towering mountains and vast empty plains lies the mysterious Garden of Dream. Oddly, most travelers never find it by simply walking. Instead... they accidentally noclip into the Dream Realm while wandering through the surrounding wasteland or falling into invisible cracks in reality.</p>
+            <p>The Garden itself is peaceful beyond imagination. Floating islands drift across a pink sky. Soft flowers bloom endlessly. Time moves differently. Visitors gradually become sleepy, forgetting why they came. Very few realize they have become trapped until it is too late.</p>
+            <p>Fortunately, hidden deep beneath the floating gardens exists a Secret Escape Route, known only to the Queen herself. Legend says those who discover the hidden passage awaken safely back in Moogusverse. Most never find it.</p>
+        </div>
+    </div>
+
+    <!-- RELATIONSHIPS -->
+    <div id="relationships" class="content-section">
+        <h2>Relationship Between the Regions</h2>
+        <p>Although each territory has its own ruler, they remain connected by ancient roads built before the corruption.</p>
+        <ul>
+            <li><strong>Crimson Palace</strong> serves as the capital where the Five gather when important decisions must be made.</li>
+            <li><strong>Spire of Deceit</strong> secretly monitors every region through illusions and magical mirrors.</li>
+            <li><strong>Land of Eclipse</strong> acts as the border between every kingdom, making the Guardian of Silence the silent watcher of the entire continent.</li>
+            <li><strong>Tropical Sun Islands</strong> provide nearly all natural resources, food, and magical plants found throughout the Corrupted Land.</li>
+            <li><strong>Garden of Dream</strong> rarely appears on maps. Its entrance shifts unpredictably, making it the most mysterious region in the kingdom.</li>
+        </ul>
+    </div>
+
+    <!-- CURRENT STATE -->
+    <div id="current-state" class="content-section">
+        <h2>Current State</h2>
+        <p>Despite their corruption, the Five rarely wage war against one another. They remember the oath they swore as protectors of Moogusverse and, in their own twisted way, still honor that bond.</p>
+        <p>To outsiders, the Corrupted Land appears as a kingdom ruled by villains. To the Five themselves, it is the last sanctuary where they no longer have to pretend that humanity deserves saving.</p>
+        <div class="dialogue-box">
+            Some legends whisper that if the lost Five Virtues—Humility, Truth, Justice, Modesty, and Diligence—could somehow be restored, the Corrupted Land of Heroes would bloom once more into the radiant Sanctuary of Virtues it had always been destined to be.
+        </div>
+    </div>
+
+    <footer>
+        &copy; Moogusverse Lore Archive - Corrupted Land of Heroes
+    </footer>
+</div>
+
+<script>
+    function openTab(evt, tabName) {
+        var i, contentSections, tabButtons;
+
+        contentSections = document.getElementsByClassName("content-section");
+        for (i = 0; i < contentSections.length; i++) {
+            contentSections[i].classList.remove("active");
+        }
+
+        tabButtons = document.getElementsByClassName("tab-button");
+        for (i = 0; i < tabButtons.length; i++) {
+            tabButtons[i].classList.remove("active");
+        }
+
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+    }
+</script>
+
+</body>
+</html>
