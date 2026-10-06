@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Horology Arc - Moogusverse Lore</title>
+    <!-- MathJax untuk Render Persamaan & Simbol Matematika/Fisika Horologi -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Times New Roman', Times, serif !important;
+        }
+
+        body {
+            background-color: #121212;
+            color: #d1d1d1;
+            line-height: 1.8;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background-color: #1e1e1e;
+            border: 1px solid #333333;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(180deg, #2a2a2a 0%, #1e1e1e 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 2px solid #3a3a3a;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: #f0f0f0;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+
+        header p.quote {
+            font-style: italic;
+            color: #a0a0a0;
+            font-size: 1.2rem;
+        }
+
+        /* Navigation Tabs */
+        nav {
+            display: flex;
+            background-color: #181818;
+            border-bottom: 1px solid #333333;
+            overflow-x: auto;
+        }
+
+        .tab-button {
+            background-color: transparent;
+            color: #888888;
+            border: none;
+            outline: none;
+            padding: 15px 18px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+            flex: 1;
+            text-align: center;
+        }
+
+        .tab-button:hover {
+            color: #cccccc;
+            background-color: #222222;
+        }
+
+        .tab-button.active {
+            color: #ffffff;
+            background-color: #262626;
+            border-bottom: 3px solid #888888;
+            font-weight: bold;
+        }
+
+        /* Tab Content */
+        .content-section {
+            display: none;
+            padding: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            font-size: 2rem;
+            color: #e0e0e0;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #444444;
+            padding-bottom: 8px;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            color: #c0c0c0;
+            margin: 20px 0 10px 0;
+        }
+
+        p {
+            margin-bottom: 15px;
+            color: #b8b8b8;
+            text-align: justify;
+        }
+
+        ul, ol {
+            margin: 15px 0 15px 30px;
+            color: #b8b8b8;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .dialogue-box {
+            background-color: #141414;
+            border-left: 4px solid #555555;
+            padding: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #d6d6d6;
+        }
+
+        /* Mind Map & Tree Visualizations */
+        .mindmap-container {
+            background-color: #141414;
+            border: 1px solid #333333;
+            border-radius: 4px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .tree-node {
+            font-family: monospace !important;
+            white-space: pre;
+            color: #aaaaaa;
+            background-color: #1a1a1a;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #2a2a2a;
+            line-height: 1.4;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .info-card {
+            background-color: #242424;
+            border: 1px solid #383838;
+            padding: 18px;
+            border-radius: 4px;
+        }
+
+        .info-card h4 {
+            color: #e0e0e0;
+            border-bottom: 1px dashed #444;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+
+        .equation-box {
+            background-color: #161616;
+            border: 1px solid #333333;
+            border-left: 3px solid #777777;
+            padding: 15px;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+
+        .symbol-list dt {
+            font-weight: bold;
+            color: #dcdcdc;
+            margin-top: 10px;
+        }
+
+        .symbol-list dd {
+            margin-left: 20px;
+            color: #a0a0a0;
+            margin-bottom: 10px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #141414;
+            border-top: 1px solid #2a2a2a;
+            color: #666666;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.8rem; }
+            .tab-button { padding: 12px 10px; font-size: 0.85rem; }
+            .content-section { padding: 20px 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>The Horology Arc</h1>
+        <p class="quote">"Time is not a straight line. It is an infinite ocean, and every choice creates another wave."</p>
+    </header>
+
+    <nav>
+        <button class="tab-button active" onclick="openTab(event, 'intro')">Introduction</button>
+        <button class="tab-button" onclick="openTab(event, 'theory')">Theory & Tree</button>
+        <button class="tab-button" onclick="openTab(event, 'laws')">Five Laws</button>
+        <button class="tab-button" onclick="openTab(event, 'equations')">Equations</button>
+        <button class="tab-button" onclick="openTab(event, 'classifications')">Classifications</button>
+        <button class="tab-button" onclick="openTab(event, 'trinity')">Chrono Trinity</button>
+        <button class="tab-button" onclick="openTab(event, 'prophecy')">Prophecy</button>
+    </nav>
+
+    <!-- TAB 1: INTRODUCTION -->
+    <div id="intro" class="content-section active">
+        <h2>Introduction</h2>
+        <p>Long before the creation of kingdoms, before the Five Virtues were born, and even before Moogusverse itself had a name, there existed only one force.</p>
+        <p>It was neither light nor darkness. Neither life nor death. It was <strong>Time</strong>.</p>
+        <p>Time was never meant to be controlled. Instead, it flowed endlessly through an invisible structure known as <strong>The Great Horological Stream</strong>, where every past, every future, every possibility, and every forgotten reality coexisted simultaneously.</p>
+        
+        <div class="dialogue-box">
+            Most beings experience only one timeline. A few can observe multiple. Only three beings have ever possessed the authority to rewrite the Horological Stream itself.
+        </div>
+
+        <h3>The Chrono Trinity</h3>
+        <div class="card-grid">
+            <div class="info-card">
+                <h4>Timewatcher</h4>
+                <p>The Keeper of Every Second. An eternal entity that observes, records, and calculates reality without altering history.</p>
+            </div>
+            <div class="info-card">
+                <h4>Last Andromeda</h4>
+                <p>The Last Star Beyond Time. A traveling guardian who repairs broken realities at the cost of her own memories.</p>
+            </div>
+            <div class="info-card">
+                <h4>Moogus</h4>
+                <p>The Child Beyond Possibility. A living anomaly whose unpredictable choices accelerate timeline divergence endlessly.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: THEORY & MIND MAP / TREE -->
+    <div id="theory" class="content-section">
+        <h2>The Horological Theory</h2>
+        <p>Unlike ordinary universes, Moogusverse does not follow a linear timeline. Instead, every event belongs to a gigantic structure called the <strong>Chronological Tree</strong>.</p>
+        
+        <h3>Visual Mind Map: Chronological Tree Structure</h3>
+        <div class="mindmap-container">
+            <div class="tree-node">Origin Timeline
+│
+├── Timeline α
+│   ├── α-01 (Stable Branch)
+│   ├── α-02 (Divergence Event)
+│   └── α-03 (Fractured Reality)
+│
+├── Timeline β
+│   ├── β-01 (Alternate Virtues)
+│   └── β-02 (Paradox State)
+│
+├── Timeline Ω (The Final Horizon)
+│
+└── Infinite Possibilities (Moogus Divergence Cascade)</div>
+        </div>
+
+        <p>Every decision... Every death... Every forgotten memory... Every impossible miracle... <em>creates another branch.</em></p>
+
+        <h3>Core Concepts of Horology</h3>
+        <p>Horology is the highest branch of temporal science. It studies:</p>
+        <ul>
+            <li><strong>Timeline Formation:</strong> How choice and probability crystallize into real universes.</li>
+            <li><strong>Temporal Energy:</strong> The raw power that sustains the flow of time.</li>
+            <li><strong>Time Fractures:</strong> Cracks in history caused by intense paradoxes or catastrophe.</li>
+            <li><strong>Probability Growth:</strong> The exponential expansion rate of potential realities.</li>
+            <li><strong>Chrono Entropy:</strong> The gradual decay of timeline stability over time.</li>
+            <li><strong>Reality Synchronization:</strong> The merging or collision of parallel timelines.</li>
+        </ul>
+        <div class="dialogue-box">
+            Only a handful of beings can truly understand Horology. Even gods struggle to comprehend it.
+        </div>
+    </div>
+
+    <!-- TAB 3: THE FIVE LAWS -->
+    <div id="laws" class="content-section">
+        <h2>The Five Horological Laws</h2>
+
+        <div class="info-card" style="margin-bottom: 15px;">
+            <h4>First Law: Origin Anchor</h4>
+            <p>Every Timeline possesses an Origin Anchor. Every universe can trace its existence back to a single event known as the <em>Anchor Event</em>. Destroying this event causes the entire timeline to collapse.</p>
+        </div>
+
+        <div class="info-card" style="margin-bottom: 15px;">
+            <h4>Second Law: Conservation of Time State</h4>
+            <p>Time cannot disappear. It only changes state:</p>
+            <p style="text-align: center; font-weight: bold; color: #a0a0a0;">Active Timeline &rarr; Dormant Timeline &rarr; Forgotten Timeline &rarr; Null Timeline</p>
+        </div>
+
+        <div class="info-card" style="margin-bottom: 15px;">
+            <h4>Third Law: Temporal Residue</h4>
+            <p>Every traveler leaves Temporal Residue. No one can travel through time without leaving fragments of themselves. These fragments slowly evolve into independent entities called <strong>Echoes</strong>.</p>
+        </div>
+
+        <div class="info-card" style="margin-bottom: 15px;">
+            <h4>Fourth Law: Exponential Probability Expansion</h4>
+            <p>Probability expands exponentially. The larger the event... the faster timelines multiply. A single conversation may create two timelines. The destruction of a kingdom may create millions.</p>
+        </div>
+
+        <div class="info-card" style="margin-bottom: 15px;">
+            <h4>Fifth Law: Self-Healing Temporal Mechanism</h4>
+            <p>Time always attempts to heal itself. Paradoxes do not instantly destroy reality. Instead... Time creates new branches to preserve existence.</p>
+        </div>
+    </div>
+
+    <!-- TAB 4: EQUATIONS & SYMBOLS -->
+    <div id="equations" class="content-section">
+        <h2>Horological Equations & Mathematical Models</h2>
+        <p>The foundational dynamics of Moogusverse's temporal stream are governed by four major equations:</p>
+
+        <!-- Equation 1 -->
+        <h3>① Temporal Divergence Equation</h3>
+        <p>Measures the rate at which new timeline branches are generated by choices and significant events.</p>
+        <div class="equation-box">
+            \[ D_t = \frac{\sum_{i=1}^{n}(P_i \cdot E_i^2)}{\sqrt{S}} \]
+        </div>
+        <dl class="symbol-list">
+            <dt>\(D_t\) &mdash; Timeline Divergence Rate</dt>
+            <dd>The speed and quantity of new timeline creation.</dd>
+
+            <dt>\(P_i\) &mdash; Probability of Choice</dt>
+            <dd>The statistical weight of a decision being made.</dd>
+
+            <dt>\(E_i\) &mdash; Event Magnitude</dt>
+            <dd>The severity or impact of the event on the timeline.</dd>
+
+            <dt>\(S\) &mdash; Stability Constant</dt>
+            <dd>The temporal resistance of the existing universe.</dd>
+        </dl>
+
+        <!-- Equation 2 -->
+        <h3>② Horological Entropy</h3>
+        <p>Measures the internal instability and decay rate of a timeline's reality continuum.</p>
+        <div class="equation-box">
+            \[ H_e = \int_{t_0}^{t_\infty} \left| \frac{dP}{dt} \right| dt \]
+        </div>
+        <p><strong>Rule of Collapse:</strong> If \( H_e > \Omega \), the timeline loses coherence and begins collapsing into a Null Timeline.</p>
+
+        <!-- Equation 3 -->
+        <h3>③ Timeline Synchronization</h3>
+        <p>Calculates the probability of two parallel timelines merging into a single history.</p>
+        <div class="equation-box">
+            \[ \Psi = \frac{T_o}{\Delta P + \Delta M} \]
+        </div>
+        <dl class="symbol-list">
+            <dt>\(\Psi\) &mdash; Synchronization Coefficient</dt>
+            <dd>If \(\Psi \to 0\), the barriers dissolve and two timelines begin merging.</dd>
+
+            <dt>\(T_o\) &mdash; Origin Stability</dt>
+            <dd>Strength of the fundamental anchor event.</dd>
+
+            <dt>\(\Delta P\) &mdash; Probability Difference</dt>
+            <dd>Divergence gap in events between timelines.</dd>
+
+            <dt>\(\Delta M\) &mdash; Memory Difference</dt>
+            <dd>Discrepancy in recorded collective history.</dd>
+        </dl>
+
+        <!-- Equation 4 -->
+        <h3>④ The Grand Chrono Constant</h3>
+        <p>The absolute equation used by Timewatcher to measure the total temporal state of Moogusverse.</p>
+        <div class="equation-box">
+            \[ \Omega_c = e^{(\Phi \cdot \lambda)} \times \frac{T_r}{C_f} \]
+        </div>
+        <dl class="symbol-list">
+            <dt>\(\Phi\) &mdash; Fate Constant</dt>
+            <dd>The immutable destiny value of an anchor event.</dd>
+
+            <dt>\(\lambda\) &mdash; Temporal Curvature</dt>
+            <dd>The distortion of time around powerful beings or artifacts.</dd>
+
+            <dt>\(T_r\) &mdash; Reality Frequency</dt>
+            <dd>The vibration rate of existing physical matter.</dd>
+
+            <dt>\(C_f\) &mdash; Causality Friction</dt>
+            <dd>The resistance against altering past actions.</dd>
+        </dl>
+    </div>
+
+    <!-- TAB 5: TIMELINE CLASSIFICATIONS -->
+    <div id="classifications" class="content-section">
+        <h2>Timeline Classification</h2>
+        <div class="card-grid">
+            <div class="info-card">
+                <h4>Prime Timeline</h4>
+                <p>The original Moogusverse. Everything begins here.</p>
+            </div>
+            <div class="info-card">
+                <h4>Hero Timeline</h4>
+                <p>The Five Guardians never become corrupted. Moogusverse remains peaceful forever.</p>
+            </div>
+            <div class="info-card">
+                <h4>Corrupted Timeline</h4>
+                <p>Current timeline. The Five Virtues fall into darkness and become the Corrupted Lords.</p>
+            </div>
+            <div class="info-card">
+                <h4>Broken Timeline</h4>
+                <p>Time itself is fractured. Past and future occur simultaneously in chaos.</p>
+            </div>
+            <div class="info-card">
+                <h4>Hollow Timeline</h4>
+                <p>Everyone exists... but nobody remembers each other.</p>
+            </div>
+            <div class="info-card">
+                <h4>Infinite Timeline</h4>
+                <p>Every possibility exists simultaneously. Impossible events become normal.</p>
+            </div>
+            <div class="info-card">
+                <h4>Omega Timeline</h4>
+                <p>The final future. Every universe eventually arrives here. No one knows what lies beyond it.</p>
+            </div>
+            <div class="info-card">
+                <h4>Null Timeline</h4>
+                <p>A timeline that failed to exist. It has no history, no future, and no beginning.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 6: CHRONO TRINITY -->
+    <div id="trinity" class="content-section">
+        <h2>The Chrono Trinity</h2>
+
+        <h3>1. Timewatcher</h3>
+        <p class="quote">"The Keeper of Every Second"</p>
+        <p>Before stars existed, Timewatcher already stood beside Time itself. He was never born; he simply appeared when the First Second began.</p>
+        <p>Unlike ordinary beings, Timewatcher cannot change history. He merely watches. Records. Calculates. Protects the balance. His enormous golden clock is called <strong>The Eternal Horologium</strong>. Every rotation determines the speed at which reality flows. If its hands stop... every timeline freezes.</p>
+        <p>He alone knows the location of Timeline Ω. Even the Five Corrupted Lords respect him, because without Timewatcher, their own history would disappear.</p>
+
+        <h3>2. Last Andromeda</h3>
+        <p class="quote">"The Last Star Beyond Time"</p>
+        <p>When the final star of the universe was destined to die, its soul refused extinction. Instead, it transformed into Last Andromeda.</p>
+        <p>Unlike Timewatcher, Last Andromeda walks freely between timelines. She acts as a guardian of collapsing universes. Whenever a timeline begins to break, she appears silently, repairing fractures before disappearing once again.</p>
+        <p>Her staff, <strong>Chronostar</strong>, can stitch together broken realities. However, every repair erases one of her own memories. She has forgotten countless worlds she once saved. Only one memory remains: a small red crewmate named <strong>Moogus</strong>.</p>
+
+        <h3>3. Moogus</h3>
+        <p class="quote">"The Child Beyond Possibility"</p>
+        <p>At first glance, Moogus appears to be nothing more than an ordinary crewmate—curious, optimistic, and fearless. Yet no record can explain his existence. Timewatcher cannot locate his Origin Timeline. Last Andromeda cannot see his future.</p>
+        <p>Every timeline containing Moogus behaves differently. Some become peaceful, some fall into ruin, and some create entirely new branches simply because he made a different choice. Because of this, Timewatcher named him <strong>The Living Divergence</strong>.</p>
+        <p>Unlike every other being, Moogus is unaffected by Horological Laws. He can unknowingly alter probability itself, causing timeline growth to accelerate far beyond normal predictions.</p>
+
+        <h3>The Moogus Effect</h3>
+        <p>Normally, one decision creates only a few alternate timelines. When Moogus is involved, the number increases dramatically:</p>
+        <div class="equation-box">
+            \[ N_{\text{new}} = 2^{(\Delta C \times M_f)} \]
+        </div>
+        <p>Where \(\Delta C\) is the Magnitude of Choice and \(M_f\) is the <em>Moogus Factor</em>. For ordinary beings, \(M_f = 1\). For Moogus, its value has never been measured, with calculations suggesting it approaches \(\infty\). One simple choice by Moogus generates a limitless cascade of new realities.</p>
+    </div>
+
+    <!-- TAB 7: PROPHECY -->
+    <div id="prophecy" class="content-section">
+        <h2>The Prophecy of the Final Hour</h2>
+        <p>Hidden within the oldest records of the Eternal Horologium is an ancient prophecy inscribed in golden light:</p>
+
+        <div class="dialogue-box" style="font-size: 1.1rem; border-left-color: #888888;">
+            "When the Child Beyond Possibility reaches the Final Hour, the Chronological Tree shall bloom without limit. Every forgotten timeline will awaken. Every hero, every villain, every future and every past shall stand together beneath the same sky. On that day, Time will no longer choose a single history—it will choose its final guardian."
+        </div>
+
+        <p>No one knows whether that guardian will be Timewatcher, Last Andromeda, Moogus... or someone yet to exist. This mystery forms the foundation of the <strong>Horology Arc</strong>, one of the greatest legends within the Moogusverse.</p>
+    </div>
+
+    <footer>
+        &copy; Moogusverse Lore Archive - The Horology Arc
+    </footer>
+</div>
+
+<script>
+    function openTab(evt, tabName) {
+        var i, contentSections, tabButtons;
+
+        contentSections = document.getElementsByClassName("content-section");
+        for (i = 0; i < contentSections.length; i++) {
+            contentSections[i].classList.remove("active");
+        }
+
+        tabButtons = document.getElementsByClassName("tab-button");
+        for (i = 0; i < tabButtons.length; i++) {
+            tabButtons[i].classList.remove("active");
+        }
+
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+
+        // Re-render MathJax formulas when switching tabs
+        if (window.MathJax) {
+            MathJax.typesetPromise();
+        }
+    }
+</script>
+
+</body>
+</html>
