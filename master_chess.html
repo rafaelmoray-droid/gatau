@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CaturBiru Master - Interactive Chess & AI Boss</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            800: '#1e293b',
+                            900: '#0f172a',
+                            950: '#0a0f1d'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f8fafc;
+            user-select: none;
+            -webkit-user-select: none;
+            min-height: 100vh;
+        }
+
+        .chess-board {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            aspect-ratio: 1 / 1;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .square {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease, filter 0.2s ease;
+        }
+
+        /* Dynamic Theme Styling Classes */
+        /* 1. Default Blue Ice */
+        .theme-blue .square-light { background-color: #e2e8f0; color: #1e293b; }
+        .theme-blue .square-dark { background-color: #2563eb; color: #ffffff; }
+
+        /* 2. Classic Wood */
+        .theme-wood .square-light { background-color: #f0d9b5; color: #3d2314; }
+        .theme-wood .square-dark { background-color: #b58863; color: #2b1704; }
+
+        /* 3. Neon Cyber */
+        .theme-cyber .square-light { background-color: #1e1e38; color: #00f0ff; }
+        .theme-cyber .square-dark { background-color: #ff007f; color: #ffffff; }
+
+        /* 4. Glass Crystal */
+        .theme-glass .square-light { background-color: rgba(255, 255, 255, 0.35); backdrop-filter: blur(4px); color: #0f172a; }
+        .theme-glass .square-dark { background-color: rgba(59, 130, 246, 0.6); backdrop-filter: blur(4px); color: #ffffff; }
+
+        /* 5. Dark Obsidian */
+        .theme-obsidian .square-light { background-color: #334155; color: #f8fafc; }
+        .theme-obsidian .square-dark { background-color: #0f172a; color: #38bdf8; }
+
+        /* 6. Gold Royal */
+        .theme-gold .square-light { background-color: #fef08a; color: #713f12; }
+        .theme-gold .square-dark { background-color: #ca8a04; color: #ffffff; }
+
+        /* 7. Soft Pastel */
+        .theme-pastel .square-light { background-color: #fbcfe8; color: #831843; }
+        .theme-pastel .square-dark { background-color: #a7f3d0; color: #064e3b; }
+
+        /* 8. Emerald Forest */
+        .theme-emerald .square-light { background-color: #e6f4ea; color: #137333; }
+        .theme-emerald .square-dark { background-color: #059669; color: #ffffff; }
+
+        /* 9. Midnight Purple */
+        .theme-purple .square-light { background-color: #e9d5ff; color: #581c87; }
+        .theme-purple .square-dark { background-color: #7e22ce; color: #ffffff; }
+
+        /* 10. Exclusive Cosmic Nebula (Locked Theme) */
+        .theme-nebula .square-light { background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%); color: #ffffff; }
+        .theme-nebula .square-dark { background: linear-gradient(135deg, #1e1b4b 0%, #4c1d95 100%); color: #fbbf24; }
+
+        /* Square Highlights */
+        .square.selected { background-color: #f59e0b !important; }
+        .square.last-move { background-color: rgba(59, 130, 246, 0.5) !important; }
+        .square.in-check { background-color: #ef4444 !important; animation: pulse-red 1.2s infinite; }
+
+        @keyframes pulse-red {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Indicators */
+        .valid-move-dot {
+            width: 28%;
+            height: 28%;
+            background-color: rgba(16, 185, 129, 0.8);
+            border-radius: 50%;
+            pointer-events: none;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+        }
+
+        .valid-capture-ring {
+            position: absolute;
+            width: 88%;
+            height: 88%;
+            border: 4px solid rgba(239, 68, 68, 0.85);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Piece Drag and Smooth Animation */
+        .piece {
+            font-size: clamp(24px, 7.5vw, 52px);
+            cursor: grab;
+            line-height: 1;
+            z-index: 10;
+            transition: transform 0.15s ease-out;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.35));
+            touch-action: none;
+        }
+
+        .piece.dragging {
+            cursor: grabbing;
+            opacity: 0.85;
+            transform: scale(1.25);
+            z-index: 50;
+            pointer-events: none;
+        }
+
+        .piece-white { color: #ffffff; text-shadow: 0 0 3px #000, 0 2px 4px rgba(0,0,0,0.8); }
+        .piece-black { color: #0f172a; text-shadow: 0 0 2px #fff; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 3px; }
+    </style>
+</head>
+<body class="flex flex-col justify-between items-center p-2 sm:p-4 md:p-6 font-sans">
+
+    <header class="w-full max-w-6xl flex justify-between items-center bg-slate-900/80 backdrop-blur-md px-4 py-3 rounded-2xl border border-slate-700/60 mb-4 shadow-xl">
+        <div class="flex items-center space-x-3">
+            <div class="bg-gradient-to-tr from-blue-600 to-indigo-500 text-white p-2.5 rounded-xl shadow-lg">
+                <i class="fa-solid fa-chess-king text-2xl"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-extrabold tracking-wide bg-gradient-to-r from-blue-400 via-indigo-200 to-cyan-300 bg-clip-text text-transparent">CaturBiru Master</h1>
+                <p class="text-xs text-slate-400 font-medium">Platform Catur Interaktif & Boss AI 2000 Elo</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-2">
+            <button onclick="toggleModal('modal-settings')" class="px-3 py-2 text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl transition flex items-center gap-2 text-slate-200 shadow">
+                <i class="fa-solid fa-palette text-blue-400"></i>
+                <span class="hidden sm:inline">Tema & Pengaturan</span>
+            </button>
+            <button onclick="toggleModal('modal-info')" class="px-3 py-2 text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl transition flex items-center gap-1.5 text-slate-300">
+                <i class="fa-solid fa-circle-info text-cyan-400"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="w-full max-w-6xl flex flex-col lg:flex-row gap-6 items-stretch justify-center flex-grow">
+        
+        <!-- Left Panel: Controls & Bot Selector -->
+        <div class="w-full lg:w-1/4 flex flex-col gap-4 order-2 lg:order-1">
+            
+            <!-- Game Mode & AI Rating Selector -->
+            <div class="bg-slate-800/90 backdrop-blur-md rounded-2xl p-4 border border-slate-700/60 shadow-lg">
+                <h2 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-gamepad text-blue-400"></i> Mode & Kesulitan
+                </h2>
+                
+                <div class="grid grid-cols-2 gap-2 mb-3">
+                    <button id="mode-friend" onclick="setGameMode('pvp')" class="py-2.5 px-3 rounded-xl border text-xs font-semibold flex flex-col items-center gap-1 transition bg-blue-600 border-blue-500 text-white shadow-md">
+                        <i class="fa-solid fa-user-group text-sm"></i> 2 Pemain (Lokal)
+                    </button>
+                    <button id="mode-bot" onclick="setGameMode('bot')" class="py-2.5 px-3 rounded-xl border border-slate-700 text-xs font-semibold flex flex-col items-center gap-1 transition bg-slate-700/50 hover:bg-slate-700 text-slate-300">
+                        <i class="fa-solid fa-robot text-sm"></i> Lawan Bot AI
+                    </button>
+                </div>
+
+                <!-- Bot Difficulty Select -->
+                <div id="bot-settings" class="space-y-3 pt-2 border-t border-slate-700/50 hidden">
+                    <div>
+                        <label class="text-xs text-slate-400 mb-1.5 block font-medium">Pilih Level Bot (Elo Rating):</label>
+                        <select id="bot-rating" onchange="updateBotRating()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-semibold">
+                            <option value="100">Rating 100 - Pemula (Langkah Acak)</option>
+                            <option value="500" selected>Rating 500 - Amatir (Tangkapan Dasar)</option>
+                            <option value="800">Rating 800 - Menengah (Evaluasi Posisi)</option>
+                            <option value="1000">Rating 1000 - Mahir (Minimax + PST)</option>
+                            <option value="2000">👑 Rating 2000 - BOSS GRANDMASTER (Buka Tema Rahasia!)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="text-xs text-slate-400 mb-1.5 block font-medium">Bermain Sebagai:</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="player-white" onclick="setPlayerSide('w')" class="py-2 rounded-lg border border-blue-500 bg-blue-600/30 text-white text-xs font-semibold flex items-center justify-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-white border border-gray-400 shadow"></span> Putih
+                            </button>
+                            <button id="player-black" onclick="setPlayerSide('b')" class="py-2 rounded-lg border border-slate-700 bg-slate-900/60 text-slate-400 text-xs font-semibold flex items-center justify-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-slate-900 border border-slate-500"></span> Hitam
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Time Control Selector -->
+            <div class="bg-slate-800/90 backdrop-blur-md rounded-2xl p-4 border border-slate-700/60 shadow-lg">
+                <h2 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2.5 flex items-center gap-2">
+                    <i class="fa-solid fa-clock text-blue-400"></i> Kontrol Waktu Waktu
+                </h2>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="setTimeControl(10)" class="tc-btn py-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-xs font-medium text-slate-200 transition border border-slate-600" data-time="10">10 Menit (Rapid)</button>
+                    <button onclick="setTimeControl(5)" class="tc-btn py-2 bg-blue-600 border border-blue-500 rounded-xl text-xs font-semibold text-white transition shadow" data-time="5">5 Menit (Blitz)</button>
+                    <button onclick="setTimeControl(3)" class="tc-btn py-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-xs font-medium text-slate-200 transition border border-slate-600" data-time="3">3 Menit (Blitz)</button>
+                    <button onclick="setTimeControl(1)" class="tc-btn py-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-xs font-medium text-slate-200 transition border border-slate-600" data-time="1">1 Menit (Bullet)</button>
+                </div>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="bg-slate-800/90 backdrop-blur-md rounded-2xl p-4 border border-slate-700/60 shadow-lg space-y-2">
+                <button onclick="resetGame()" class="w-full py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 active:scale-[0.99] text-white font-semibold rounded-xl text-xs transition shadow-md flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i> Permainan Baru
+                </button>
+                <div class="grid grid-cols-3 gap-2">
+                    <button id="btn-pause" onclick="togglePauseGame()" class="py-2 bg-slate-700 hover:bg-slate-600 active:scale-[0.99] text-slate-200 font-medium rounded-xl text-xs transition flex items-center justify-center gap-1">
+                        <i class="fa-solid fa-pause"></i> Jeda
+                    </button>
+                    <button onclick="undoMove()" class="py-2 bg-slate-700 hover:bg-slate-600 active:scale-[0.99] text-slate-200 font-medium rounded-xl text-xs transition flex items-center justify-center gap-1">
+                        <i class="fa-solid fa-rotate-left"></i> Undo
+                    </button>
+                    <button onclick="resignGame()" class="py-2 bg-rose-600/80 hover:bg-rose-600 active:scale-[0.99] text-white font-medium rounded-xl text-xs transition flex items-center justify-center gap-1">
+                        <i class="fa-solid fa-flag"></i> menyerah
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Middle Column: Main Chess Board & Clocks -->
+        <div class="w-full lg:w-2/4 flex flex-col items-center justify-center order-1 lg:order-2">
+            
+            <!-- Top Opponent Bar & Clock -->
+            <div id="top-player-bar" class="w-full max-w-[500px] bg-slate-800/90 px-4 py-2.5 rounded-t-2xl border-t border-x border-slate-700/60 flex items-center justify-between shadow">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-slate-300 border border-slate-700 shadow">
+                        <i id="top-player-icon" class="fa-solid fa-user text-xs"></i>
+                    </div>
+                    <div>
+                        <div id="top-player-name" class="text-xs font-bold text-slate-200">Pemain 2 (Hitam)</div>
+                        <div id="top-captured" class="text-[12px] h-4 flex items-center gap-0.5 text-slate-400"></div>
+                    </div>
+                </div>
+                <div id="top-timer" class="text-sm font-mono font-bold bg-slate-950 px-3 py-1 rounded-lg text-slate-200 border border-slate-700/60 shadow-inner">05:00</div>
+            </div>
+
+            <!-- Chessboard Container -->
+            <div id="board-container" class="relative w-full max-w-[500px] border-4 border-slate-800 shadow-2xl bg-slate-900 theme-blue">
+                <div id="chessboard" class="chess-board w-full"></div>
+            </div>
+
+            <!-- Bottom Player Bar & Clock -->
+            <div id="bottom-player-bar" class="w-full max-w-[500px] bg-slate-800/90 px-4 py-2.5 rounded-b-2xl border-b border-x border-slate-700/60 flex items-center justify-between shadow">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white border border-blue-400 shadow">
+                        <i id="bottom-player-icon" class="fa-solid fa-user text-xs"></i>
+                    </div>
+                    <div>
+                        <div id="bottom-player-name" class="text-xs font-bold text-slate-200">Pemain 1 (Putih)</div>
+                        <div id="bottom-captured" class="text-[12px] h-4 flex items-center gap-0.5 text-slate-400"></div>
+                    </div>
+                </div>
+                <div id="bottom-timer" class="text-sm font-mono font-bold bg-slate-950 px-3 py-1 rounded-lg text-slate-200 border border-slate-700/60 shadow-inner">05:00</div>
+            </div>
+
+            <!-- Status Banner -->
+            <div id="game-status-banner" class="w-full max-w-[500px] mt-3 py-2 px-4 rounded-xl bg-slate-800/80 border border-slate-700/60 text-center text-xs font-medium text-blue-200 flex items-center justify-center gap-2 shadow">
+                <span id="status-pulse" class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                <span id="status-text">Giliran: Putih Melangkah</span>
+            </div>
+        </div>
+
+        <!-- Right Panel: Move Log Notation -->
+        <div class="w-full lg:w-1/4 flex flex-col gap-4 order-3">
+            <div class="bg-slate-800/90 backdrop-blur-md rounded-2xl p-4 border border-slate-700/60 shadow-lg flex-grow flex flex-col h-[380px] lg:h-auto">
+                <h2 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center justify-between">
+                    <span class="flex items-center gap-2">
+                        <i class="fa-solid fa-list-ol text-blue-400"></i> Notasi Notasi
+                    </span>
+                    <span id="move-count" class="text-xs bg-slate-900 px-2.5 py-0.5 rounded-full text-slate-400 font-normal">0 langkah</span>
+                </h2>
+
+                <!-- Log Table -->
+                <div class="flex-grow overflow-y-auto pr-1 border border-slate-700/50 rounded-xl bg-slate-950/60 p-2 text-xs">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="text-slate-400 border-b border-slate-800 pb-1 font-semibold">
+                                <th class="py-1 px-2 w-10">#</th>
+                                <th class="py-1 px-2">Putih</th>
+                                <th class="py-1 px-2">Hitam</th>
+                            </tr>
+                        </thead>
+                        <tbody id="move-history-body" class="font-mono text-slate-300">
+                            <!-- Dynamic Content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Settings & Themes Modal -->
+    <div id="modal-settings" class="fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl text-slate-200 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="toggleModal('modal-settings')" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-blue-400"></i> Pengaturan & Tema Papan
+            </h3>
+
+            <!-- Theme Grid Selection -->
+            <div class="mb-5">
+                <label class="text-xs font-semibold text-slate-300 mb-2 block">Pilih Tema Visual (10 Pilihan):</label>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                    <button onclick="selectTheme('theme-blue')" class="theme-option p-2 bg-slate-900 border-2 border-blue-500 rounded-xl text-xs font-medium flex items-center gap-2">
+                        <span class="w-4 h-4 rounded bg-blue-600 border border-white"></span> Biru (Default)
+                    </button>
+                    <button onclick="selectTheme('theme-wood')" class="theme-option p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs font-medium flex items-center gap-2">
+                        <span class="w-4 h-4 rounded bg-amber-700"></span> Kayu Klasik
+                    </button>
+                    <button onclick="selectTheme('theme-cyber')" class="theme-option p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs font-medium flex items-center gap-2">
+                        <span class="w-4 h-4 rounded bg-pink-600"></span> Neon Cyber
+                    </button>
+                    <button onclick="selectTheme('theme-glass')" class="theme-option p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs font-medium flex items-center gap-2">
+                        <span class="w-4 h-4 rounded bg-sky-400"></span> Kristal Kaca
+                    </button>
+                    <button onclick="selectTheme('theme-obsidian')" class="theme-option p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs font-medium flex items-center gap-2">
+                        <span class="w-4 h-4 rounded bg-slate-900 border border-slate-500"></span> Obsidian
+                    </button>
+                    <button onclick="selectTheme('theme-gold')" class="theme-option p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs font-medium flex items-center gap-2">
+                        <span class="w-4 h-4 rounded bg-yellow-500"></span> Emas Kerajaan
+                    </button>
+                    <button onclick="selectTheme('theme-pastel')" class="theme-option p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs font-medium flex items-center gap-2">
+                        <span class="w-4 h-4 rounded bg-pink-300"></span> Soft Pastel
+                    </button>
+                    <button onclick="selectTheme('theme-emerald')" class="theme-option p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs font-medium flex items-center gap-2">
+                        <span class="w-4 h-4 rounded bg-emerald-600"></span> Emerald
+                    </button>
+                    <button onclick="selectTheme('theme-purple')" class="theme-option p-2 bg-slate-900 border border-slate-700 rounded-xl text-xs font-medium flex items-center gap-2">
+                        <span class="w-4 h-4 rounded bg-purple-600"></span> Midnight Purple
+                    </button>
+
+                    <!-- Exclusive Locked Theme -->
+                    <button id="theme-btn-nebula" onclick="selectTheme('theme-nebula')" class="theme-option p-2 bg-slate-950 border border-amber-500/50 rounded-xl text-xs font-medium flex items-center gap-2 relative opacity-60 cursor-not-allowed">
+                        <span class="w-4 h-4 rounded bg-gradient-to-r from-purple-500 to-blue-500"></span> Cosmic Nebula
+                        <i id="nebula-lock-icon" class="fa-solid fa-lock text-amber-400 ml-auto"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Toggle Features -->
+            <div class="space-y-3 pt-3 border-t border-slate-700/60 text-xs">
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-300">Efek Suara Audio</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="sound-toggle" checked class="sr-only peer">
+                        <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-300">Indikator Langkah Valid</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="hints-toggle" checked onchange="renderBoard()" class="sr-only peer">
+                        <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-300">Sorot Langkah Terakhir</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="highlight-toggle" checked onchange="renderBoard()" class="sr-only peer">
+                        <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+            </div>
+
+            <button onclick="toggleModal('modal-settings')" class="mt-6 w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl transition">
+                Simpan & Tutup
+            </button>
+        </div>
+    </div>
+
+    <!-- Info Modal -->
+    <div id="modal-info" class="fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl text-slate-200 relative">
+            <button onclick="toggleModal('modal-info')" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-circle-info text-blue-400"></i> Panduan CaturBiru
+            </h3>
+            <div class="space-y-3 text-xs leading-relaxed text-slate-300">
+                <p>Selamat datang di <strong>CaturBiru Master</strong>! Nikmati permainan catur dengan animasi halus, pilihan timer, dan AI Bot tangguh.</p>
+                <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700/60 space-y-1">
+                    <p class="font-bold text-blue-300">Misi Khusus Unlocking:</p>
+                    <p>Kalahkan Bot AI level <strong>2000 Boss Grandmaster</strong> untuk membuka tema eksklusif 👑 <strong>Cosmic Nebula</strong>!</p>
+                </div>
+                <p>Fitur Utama: Drag and Drop bidak, kontrol timer (10, 5, 3, 1 mnt), Rokade, En Passant, dan Suara Audio bawaan.</p>
+            </div>
+            <button onclick="toggleModal('modal-info')" class="mt-5 w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl transition">
+                Tutup & Bermain
+            </button>
+        </div>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div id="modal-gameover" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl text-slate-200 text-center relative animate-bounce-in">
+            <div class="w-16 h-16 bg-blue-600/30 border border-blue-500 rounded-full flex items-center justify-center mx-auto mb-3 text-blue-400 text-2xl">
+                <i id="go-icon" class="fa-solid fa-trophy"></i>
+            </div>
+            <h3 id="go-title" class="text-xl font-bold text-white mb-1">Permainan Selesai</h3>
+            <p id="go-reason" class="text-xs text-slate-400 mb-4">Skakmat! Putih Menang.</p>
+
+            <div id="go-unlock-banner" class="hidden bg-gradient-to-r from-purple-900/80 to-indigo-900/80 border border-purple-500/50 p-3 rounded-xl mb-4 text-xs text-purple-200 flex items-center gap-2">
+                <i class="fa-solid fa-crown text-yellow-400 text-lg"></i>
+                <div class="text-left">
+                    <p class="font-bold">Tema Baru Terbuka!</p>
+                    <p class="text-[11px] text-purple-300">Anda mengalahkan 2000 Elo Bot! Tema "Cosmic Nebula" kini aktif.</p>
+                </div>
+            </div>
+
+            <button onclick="toggleModal('modal-gameover'); resetGame();" class="w-full py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold rounded-xl transition shadow-lg">
+                Mainkan Lagi
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Web Audio Synthesizer
+        const AudioSys = {
+            ctx: null,
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            },
+            playTone(freq, type = 'sine', duration = 0.1, gainVal = 0.15) {
+                if (!document.getElementById('sound-toggle').checked) return;
+                try {
+                    this.init();
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch(e) {}
+            },
+            playMove() { this.playTone(480, 'sine', 0.08, 0.15); },
+            playCapture() { this.playTone(280, 'triangle', 0.12, 0.25); },
+            playCheck() { this.playTone(750, 'square', 0.18, 0.2); },
+            playEnd() { 
+                this.playTone(523.25, 'sine', 0.15, 0.2);
+                setTimeout(() => this.playTone(659.25, 'sine', 0.25, 0.2), 140);
+            }
+        };
+
+        // Piece Symbols
+        const PIECES = {
+            wP: '♙', wN: '♘', wB: '♗', wR: '♖', wQ: '♕', wK: '♔',
+            bP: '♟', bN: '♞', bB: '♝', bR: '♜', bQ: '♛', bK: '♚'
+        };
+
+        const PIECE_VALUES = { p: 10, n: 30, b: 30, r: 50, q: 90, k: 900 };
+
+        // Position Tables for AI Evaluation
+        const pawnPST = [
+            0,  0,  0,  0,  0,  0,  0,  0,
+            50, 50, 50, 50, 50, 50, 50, 50,
+            10, 10, 20, 30, 30, 20, 10, 10,
+             5,  5, 10, 25, 25, 10,  5,  5,
+             0,  0,  0, 20, 20,  0,  0,  0,
+             5, -5,-10,  0,  0,-10, -5,  5,
+             5, 10, 10,-20,-20, 10, 10,  5,
+             0,  0,  0,  0,  0,  0,  0,  0
+        ];
+
+        const knightPST = [
+            -50,-40,-30,-30,-30,-30,-40,-50,
+            -40,-20,  0,  0,  0,  0,-20,-40,
+            -30,  0, 10, 15, 15, 10,  0,-30,
+            -30,  5, 15, 20, 20, 15,  5,-30,
+            -30,  0, 15, 20, 20, 15,  0,-30,
+            -30,  5, 10, 15, 15, 10,  5,-30,
+            -40,-20,  0,  5,  5,  0,-20,-40,
+            -50,-40,-30,-30,-30,-30,-40,-50
+        ];
+
+        // Global State Variables
+        let board = [];
+        let turn = 'w';
+        let gameMode = 'pvp';
+        let botRating = 500;
+        let playerSide = 'w';
+        let selectedSquare = null;
+        let validMoves = [];
+        let moveHistory = [];
+        let historyLog = [];
+        let capturedPieces = { w: [], b: [] };
+        let lastMove = null;
+        let isGameOver = false;
+        let isPaused = false;
+        let is2000Unlocked = false;
+
+        // Timers State
+        let initialTimeInSeconds = 300; // 5 min default
+        let timers = { w: 300, b: 300 };
+        let timerInterval = null;
+
+        // Castling & En Passant
+        let castleRights = { w: { k: true, q: true }, b: { k: true, q: true } };
+        let enPassantTarget = null;
+
+        function initBoard() {
+            board = [
+                ['bR', 'bN', 'bB', 'bQ', 'bK', 'bB', 'bN', 'bR'],
+                ['bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP'],
+                [null, null, null, null, null, null, null, null],
+                [null, null, null, null, null, null, null, null],
+                [null, null, null, null, null, null, null, null],
+                [null, null, null, null, null, null, null, null],
+                ['wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP'],
+                ['wR', 'wN', 'wB', 'wQ', 'wK', 'wB', 'wN', 'wR']
+            ];
+            turn = 'w';
+            selectedSquare = null;
+            validMoves = [];
+            moveHistory = [];
+            historyLog = [];
+            capturedPieces = { w: [], b: [] };
+            lastMove = null;
+            isGameOver = false;
+            isPaused = false;
+            castleRights = { w: { k: true, q: true }, b: { k: true, q: true } };
+            enPassantTarget = null;
+
+            resetTimers();
+            updateUI();
+            
+            if (gameMode === 'bot' && playerSide === 'b' && turn === 'w') {
+                setTimeout(makeBotMove, 400);
+            }
+        }
+
+        function setTimeControl(mins) {
+            initialTimeInSeconds = mins * 60;
+            document.querySelectorAll('.tc-btn').forEach(btn => {
+                const bTime = parseInt(btn.getAttribute('data-time'));
+                if (bTime === mins) {
+                    btn.className = 'tc-btn py-2 bg-blue-600 border border-blue-500 rounded-xl text-xs font-semibold text-white transition shadow';
+                } else {
+                    btn.className = 'tc-btn py-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-xs font-medium text-slate-200 transition border border-slate-600';
+                }
+            });
+            initBoard();
+        }
+
+        function resetTimers() {
+            clearInterval(timerInterval);
+            timers = { w: initialTimeInSeconds, b: initialTimeInSeconds };
+            updateTimerDisplay();
+            startTimer();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (isGameOver || isPaused) return;
+                
+                timers[turn]--;
+                updateTimerDisplay();
+
+                if (timers[turn] <= 0) {
+                    clearInterval(timerInterval);
+                    isGameOver = true;
+                    const loser = turn === 'w' ? 'Putih' : 'Hitam';
+                    const winner = turn === 'w' ? 'Hitam' : 'Putih';
+                    showGameOverModal(`${winner} Menang!`, `Waktu ${loser} telah habis (Timeout).`);
+                    AudioSys.playEnd();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const format = (s) => {
+                const m = Math.floor(s / 60);
+                const sec = s % 60;
+                return `${m < 10 ? '0' : ''}${m}:${sec < 10 ? '0' : ''}${sec}`;
+            };
+
+            const isFlipped = (gameMode === 'bot' && playerSide === 'b');
+            const topTimerEl = document.getElementById('top-timer');
+            const bottomTimerEl = document.getElementById('bottom-timer');
+
+            if (isFlipped) {
+                topTimerEl.innerText = format(timers.w);
+                bottomTimerEl.innerText = format(timers.b);
+            } else {
+                topTimerEl.innerText = format(timers.b);
+                bottomTimerEl.innerText = format(timers.w);
+            }
+        }
+
+        function togglePauseGame() {
+            if (isGameOver) return;
+            isPaused = !isPaused;
+            const btn = document.getElementById('btn-pause');
+            btn.innerHTML = isPaused ? '<i class="fa-solid fa-play"></i> Lanjut' : '<i class="fa-solid fa-pause"></i> Jeda';
+            updateStatusText();
+        }
+
+        function getPieceColor(p) { return p ? p[0] : null; }
+        function getPieceType(p) { return p ? p[1].toLowerCase() : null; }
+        function isSquareOnBoard(r, c) { return r >= 0 && r < 8 && c >= 0 && c < 8; }
+
+        function generatePseudoLegalMoves(r, c, currentBoard = board, currentEnPassant = enPassantTarget) {
+            const piece = currentBoard[r][c];
+            if (!piece) return [];
+            const color = getPieceColor(piece);
+            const type = getPieceType(piece);
+            const moves = [];
+
+            const addMove = (tr, tc, extra = {}) => {
+                if (isSquareOnBoard(tr, tc)) {
+                    const target = currentBoard[tr][tc];
+                    if (!target || getPieceColor(target) !== color) {
+                        moves.push({ from: { r, c }, to: { r: tr, c: tc }, piece, captured: target, ...extra });
+                        return !target;
+                    }
+                }
+                return false;
+            };
+
+            if (type === 'p') {
+                const dir = color === 'w' ? -1 : 1;
+                const startRow = color === 'w' ? 6 : 1;
+
+                if (isSquareOnBoard(r + dir, c) && !currentBoard[r + dir][c]) {
+                    moves.push({ from: { r, c }, to: { r: r + dir, c }, piece });
+                    if (r === startRow && !currentBoard[r + 2 * dir][c]) {
+                        moves.push({ from: { r, c }, to: { r: r + 2 * dir, c }, piece, isDoublePawn: true });
+                    }
+                }
+                [-1, 1].forEach(dc => {
+                    const tr = r + dir, tc = c + dc;
+                    if (isSquareOnBoard(tr, tc)) {
+                        const target = currentBoard[tr][tc];
+                        if (target && getPieceColor(target) !== color) {
+                            moves.push({ from: { r, c }, to: { r: tr, c: tc }, piece, captured: target });
+                        } else if (currentEnPassant && currentEnPassant.r === tr && currentEnPassant.c === tc) {
+                            moves.push({ from: { r, c }, to: { r: tr, c: tc }, piece, captured: currentBoard[r][tc], isEnPassant: true });
+                        }
+                    }
+                });
+            } else if (type === 'n') {
+                const offsets = [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]];
+                offsets.forEach(([dr, dc]) => addMove(r + dr, c + dc));
+            } else if (type === 'k') {
+                const offsets = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+                offsets.forEach(([dr, dc]) => addMove(r + dr, c + dc));
+
+                if (r === (color === 'w' ? 7 : 0) && c === 4) {
+                    const rights = castleRights[color];
+                    if (rights.k && !currentBoard[r][5] && !currentBoard[r][6]) {
+                        moves.push({ from: { r, c }, to: { r, c: 6 }, piece, isCastle: 'k' });
+                    }
+                    if (rights.q && !currentBoard[r][1] && !currentBoard[r][2] && !currentBoard[r][3]) {
+                        moves.push({ from: { r, c }, to: { r, c: 2 }, piece, isCastle: 'q' });
+                    }
+                }
+            } else {
+                const dirs = [];
+                if (type === 'b' || type === 'q') dirs.push([-1,-1],[-1,1],[1,-1],[1,1]);
+                if (type === 'r' || type === 'q') dirs.push([-1,0],[1,0],[0,-1],[0,1]);
+                dirs.forEach(([dr, dc]) => {
+                    let step = 1;
+                    while (addMove(r + dr * step, c + dc * step)) { step++; }
+                });
+            }
+
+            return moves;
+        }
+
+        function isKingInCheck(color, currentBoard = board) {
+            let kingPos = null;
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    if (currentBoard[r][c] === color + 'K') {
+                        kingPos = { r, c };
+                        break;
+                    }
+                }
+            }
+            if (!kingPos) return false;
+
+            const enemyColor = color === 'w' ? 'b' : 'w';
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    if (getPieceColor(currentBoard[r][c]) === enemyColor) {
+                        const moves = generatePseudoLegalMoves(r, c, currentBoard, null);
+                        if (moves.some(m => m.to.r === kingPos.r && m.to.c === kingPos.c)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        function getLegalMoves(r, c) {
+            const pseudoMoves = generatePseudoLegalMoves(r, c);
+            const color = getPieceColor(board[r][c]);
+
+            return pseudoMoves.filter(move => {
+                if (move.isCastle) {
+                    if (isKingInCheck(color, board)) return false;
+                    const passCol = move.isCastle === 'k' ? 5 : 3;
+                    const tempBoardPass = applyMoveToBoard(board, { ...move, to: { r: move.from.r, c: passCol } });
+                    if (isKingInCheck(color, tempBoardPass)) return false;
+                }
+                const tempBoard = applyMoveToBoard(board, move);
+                return !isKingInCheck(color, tempBoard);
+            });
+        }
+
+        function getAllLegalMoves(color) {
+            let moves = [];
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    if (getPieceColor(board[r][c]) === color) {
+                        moves = moves.concat(getLegalMoves(r, c));
+                    }
+                }
+            }
+            return moves;
+        }
+
+        function applyMoveToBoard(b, move) {
+            const newBoard = b.map(row => [...row]);
+            newBoard[move.to.r][move.to.c] = newBoard[move.from.r][move.from.c];
+            newBoard[move.from.r][move.from.c] = null;
+
+            if (move.isEnPassant) {
+                newBoard[move.from.r][move.to.c] = null;
+            }
+
+            if (move.isCastle) {
+                const r = move.from.r;
+                if (move.isCastle === 'k') {
+                    newBoard[r][5] = newBoard[r][7];
+                    newBoard[r][7] = null;
+                } else if (move.isCastle === 'q') {
+                    newBoard[r][3] = newBoard[r][0];
+                    newBoard[r][0] = null;
+                }
+            }
+
+            const pieceType = getPieceType(move.piece);
+            const color = getPieceColor(move.piece);
+            if (pieceType === 'p' && (move.to.r === 0 || move.to.r === 7)) {
+                newBoard[move.to.r][move.to.c] = color + 'Q';
+            }
+
+            return newBoard;
+        }
+
+        function executeMove(move) {
+            moveHistory.push({
+                board: board.map(r => [...r]),
+                turn,
+                castleRights: JSON.parse(JSON.stringify(castleRights)),
+                enPassantTarget,
+                capturedPieces: JSON.parse(JSON.stringify(capturedPieces)),
+                lastMove
+            });
+
+            const pieceColor = getPieceColor(move.piece);
+            const pieceType = getPieceType(move.piece);
+
+            let capturedPiece = board[move.to.r][move.to.c];
+            if (move.isEnPassant) capturedPiece = pieceColor === 'w' ? 'bP' : 'wP';
+
+            if (capturedPiece) {
+                capturedPieces[pieceColor].push(capturedPiece);
+                AudioSys.playCapture();
+            } else {
+                AudioSys.playMove();
+            }
+
+            board = applyMoveToBoard(board, move);
+
+            if (pieceType === 'k') castleRights[pieceColor] = { k: false, q: false };
+            if (pieceType === 'r') {
+                if (move.from.c === 0) castleRights[pieceColor].q = false;
+                if (move.from.c === 7) castleRights[pieceColor].k = false;
+            }
+
+            enPassantTarget = move.isDoublePawn ? { r: (move.from.r + move.to.r) / 2, c: move.from.c } : null;
+
+            lastMove = move;
+            turn = turn === 'w' ? 'b' : 'w';
+
+            recordAlgebraicNotation(move, capturedPiece);
+            selectedSquare = null;
+            validMoves = [];
+
+            const opponentMoves = getAllLegalMoves(turn);
+            const inCheck = isKingInCheck(turn);
+
+            if (inCheck) AudioSys.playCheck();
+
+            if (opponentMoves.length === 0) {
+                isGameOver = true;
+                clearInterval(timerInterval);
+                AudioSys.playEnd();
+
+                if (inCheck) {
+                    const winner = turn === 'w' ? 'Hitam' : 'Putih';
+                    let unlocked = false;
+
+                    // Unlocking Cosmic Nebula Boss Board
+                    if (gameMode === 'bot' && botRating == 2000 && winner === (playerSide === 'w' ? 'Putih' : 'Hitam')) {
+                        unlocked = true;
+                        unlockBossTheme();
+                    }
+
+                    showGameOverModal(`SKAKMAT! ${winner} Menang! 🎉`, `Semua langkah raja telah terkunci.`, unlocked);
+                } else {
+                    showGameOverModal('REMIS!', 'Stalemate (Tidak Ada Langkah Valid).');
+                }
+            } else {
+                updateUI();
+                if (!isGameOver && gameMode === 'bot' && turn !== playerSide) {
+                    setTimeout(makeBotMove, 250);
+                }
+            }
+        }
+
+        function recordAlgebraicNotation(move, captured) {
+            const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+            const pType = getPieceType(move.piece).toUpperCase();
+            const pieceStr = pType === 'P' ? '' : pType;
+            const capStr = captured ? 'x' : '';
+            const destStr = files[move.to.c] + (8 - move.to.r);
+
+            let note = pieceStr + capStr + destStr;
+            if (move.isCastle) note = move.isCastle === 'k' ? 'O-O' : 'O-O-O';
+
+            if (isKingInCheck(turn)) {
+                note += getAllLegalMoves(turn).length === 0 ? '#' : '+';
+            }
+
+            if (getPieceColor(move.piece) === 'w') {
+                historyLog.push({ white: note, black: '' });
+            } else {
+                if (historyLog.length > 0) {
+                    historyLog[historyLog.length - 1].black = note;
+                }
+            }
+        }
+
+        function makeBotMove() {
+            if (isGameOver || isPaused) return;
+            const legalMoves = getAllLegalMoves(turn);
+            if (legalMoves.length === 0) return;
+
+            let chosenMove = null;
+
+            if (botRating == 100) {
+                chosenMove = legalMoves[Math.floor(Math.random() * legalMoves.length)];
+            } else if (botRating == 500) {
+                const captureMoves = legalMoves.filter(m => board[m.to.r][m.to.c] !== null);
+                if (captureMoves.length > 0 && Math.random() < 0.75) {
+                    chosenMove = captureMoves[Math.floor(Math.random() * captureMoves.length)];
+                } else {
+                    chosenMove = legalMoves[Math.floor(Math.random() * legalMoves.length)];
+                }
+            } else if (botRating == 800) {
+                let bestValue = -9999;
+                let bestMoves = [];
+
+                legalMoves.forEach(m => {
+                    const tempB = applyMoveToBoard(board, m);
+                    const val = evaluateBoardSimple(tempB, turn);
+                    if (val > bestValue) {
+                        bestValue = val;
+                        bestMoves = [m];
+                    } else if (val === bestValue) {
+                        bestMoves.push(m);
+                    }
+                });
+                chosenMove = bestMoves[Math.floor(Math.random() * bestMoves.length)];
+            } else if (botRating == 1000) {
+                chosenMove = getBestMoveMinimax(2);
+            } else if (botRating == 2000) {
+                // 2000 Elo Boss AI Depth 3 Minimax + Advanced PST
+                chosenMove = getBestMoveMinimax(3);
+            }
+
+            if (chosenMove) executeMove(chosenMove);
+        }
+
+        function evaluateBoardSimple(b, color) {
+            let score = 0;
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    const p = b[r][c];
+                    if (p) {
+                        const val = PIECE_VALUES[getPieceType(p)] || 0;
+                        score += (getPieceColor(p) === color ? val : -val);
+                    }
+                }
+            }
+            return score;
+        }
+
+        function getBestMoveMinimax(depth) {
+            const legalMoves = getAllLegalMoves(turn);
+            let bestMove = null;
+            let bestValue = -99999;
+            let alpha = -100000;
+            let beta = 100000;
+
+            legalMoves.sort(() => Math.random() - 0.5);
+
+            for (let move of legalMoves) {
+                const tempB = applyMoveToBoard(board, move);
+                const boardVal = minimax(tempB, depth - 1, alpha, beta, false, turn);
+                if (boardVal > bestValue) {
+                    bestValue = boardVal;
+                    bestMove = move;
+                }
+                alpha = Math.max(alpha, bestValue);
+            }
+            return bestMove || legalMoves[0];
+        }
+
+        function minimax(b, depth, alpha, beta, isMaximizing, botColor) {
+            if (depth === 0) return evaluateBoardAdvanced(b, botColor);
+
+            const currColor = isMaximizing ? botColor : (botColor === 'w' ? 'b' : 'w');
+            let moves = [];
+            
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    if (getPieceColor(b[r][c]) === currColor) {
+                        moves = moves.concat(generatePseudoLegalMoves(r, c, b, null));
+                    }
+                }
+            }
+
+            if (moves.length === 0) return 0;
+
+            if (isMaximizing) {
+                let maxEval = -99999;
+                for (let move of moves) {
+                    const tempB = applyMoveToBoard(b, move);
+                    const evalVal = minimax(tempB, depth - 1, alpha, beta, false, botColor);
+                    maxEval = Math.max(maxEval, evalVal);
+                    alpha = Math.max(alpha, evalVal);
+                    if (beta <= alpha) break;
+                }
+                return maxEval;
+            } else {
+                let minEval = 99999;
+                for (let move of moves) {
+                    const tempB = applyMoveToBoard(b, move);
+                    const evalVal = minimax(tempB, depth - 1, alpha, beta, true, botColor);
+                    minEval = Math.min(minEval, evalVal);
+                    beta = Math.min(beta, evalVal);
+                    if (beta <= alpha) break;
+                }
+                return minEval;
+            }
+        }
+
+        function evaluateBoardAdvanced(b, botColor) {
+            let total = 0;
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    const p = b[r][c];
+                    if (p) {
+                        const pColor = getPieceColor(p);
+                        const pType = getPieceType(p);
+                        let val = (PIECE_VALUES[pType] || 0) * 10;
+
+                        const idx = r * 8 + c;
+                        if (pType === 'p') val += pawnPST[idx];
+                        if (pType === 'n') val += knightPST[idx];
+
+                        total += (pColor === botColor ? val : -val);
+                    }
+                }
+            }
+            return total;
+        }
+
+        let draggedPieceData = null;
+
+        function handleSquareClick(r, c) {
+            if (isGameOver || isPaused) return;
+            if (gameMode === 'bot' && turn !== playerSide) return;
+
+            const piece = board[r][c];
+            const pieceColor = getPieceColor(piece);
+
+            if (pieceColor === turn) {
+                selectedSquare = { r, c };
+                validMoves = getLegalMoves(r, c);
+                renderBoard();
+                return;
+            }
+
+            if (selectedSquare) {
+                const targetMove = validMoves.find(m => m.to.r === r && m.to.c === c);
+                if (targetMove) {
+                    executeMove(targetMove);
+                } else {
+                    selectedSquare = null;
+                    validMoves = [];
+                    renderBoard();
+                }
+            }
+        }
+
+        function renderBoard() {
+            const boardEl = document.getElementById('chessboard');
+            boardEl.innerHTML = '';
+
+            const isFlipped = (gameMode === 'bot' && playerSide === 'b');
+            const inCheck = isKingInCheck(turn);
+
+            const showHints = document.getElementById('hints-toggle').checked;
+            const showHighlight = document.getElementById('highlight-toggle').checked;
+
+            for (let displayR = 0; displayR < 8; displayR++) {
+                for (let displayC = 0; displayC < 8; displayC++) {
+                    const r = isFlipped ? 7 - displayR : displayR;
+                    const c = isFlipped ? 7 - displayC : displayC;
+
+                    const square = document.createElement('div');
+                    const isLight = (r + c) % 2 === 0;
+                    square.className = `square ${isLight ? 'square-light' : 'square-dark'}`;
+                    square.dataset.r = r;
+                    square.dataset.c = c;
+
+                    if (selectedSquare && selectedSquare.r === r && selectedSquare.c === c) {
+                        square.classList.add('selected');
+                    }
+                    if (showHighlight && lastMove && ((lastMove.from.r === r && lastMove.from.c === c) || (lastMove.to.r === r && lastMove.to.c === c))) {
+                        square.classList.add('last-move');
+                    }
+
+                    const piece = board[r][c];
+                    if (piece && getPieceType(piece) === 'k' && getPieceColor(piece) === turn && inCheck) {
+                        square.classList.add('in-check');
+                    }
+
+                    if (piece) {
+                        const pieceEl = document.createElement('span');
+                        const pColor = getPieceColor(piece);
+                        pieceEl.className = `piece ${pColor === 'w' ? 'piece-white' : 'piece-black'}`;
+                        pieceEl.innerHTML = PIECES[piece];
+                        pieceEl.draggable = true;
+
+                        // Drag & Drop Listeners
+                        pieceEl.addEventListener('dragstart', (e) => {
+                            if (isGameOver || isPaused || (gameMode === 'bot' && turn !== playerSide)) return;
+                            if (pColor !== turn) return;
+                            selectedSquare = { r, c };
+                            validMoves = getLegalMoves(r, c);
+                            draggedPieceData = { r, c, piece };
+                            pieceEl.classList.add('dragging');
+                        });
+
+                        pieceEl.addEventListener('dragend', () => {
+                            pieceEl.classList.remove('dragging');
+                        });
+
+                        square.appendChild(pieceEl);
+                    }
+
+                    square.addEventListener('dragover', (e) => e.preventDefault());
+                    square.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        if (draggedPieceData) {
+                            const targetMove = validMoves.find(m => m.to.r === r && m.to.c === c);
+                            if (targetMove) executeMove(targetMove);
+                            draggedPieceData = null;
+                        }
+                    });
+
+                    if (showHints) {
+                        const validMove = validMoves.find(m => m.to.r === r && m.to.c === c);
+                        if (validMove) {
+                            if (piece || validMove.isEnPassant) {
+                                const ring = document.createElement('div');
+                                ring.className = 'valid-capture-ring';
+                                square.appendChild(ring);
+                            } else {
+                                const dot = document.createElement('div');
+                                dot.className = 'valid-move-dot';
+                                square.appendChild(dot);
+                            }
+                        }
+                    }
+
+                    square.onclick = () => handleSquareClick(r, c);
+                    boardEl.appendChild(square);
+                }
+            }
+        }
+
+        function updateUI() {
+            renderBoard();
+            updateStatusText();
+            renderCapturedPieces();
+            renderMoveHistory();
+            updatePlayerBars();
+        }
+
+        function updateStatusText() {
+            const statusText = document.getElementById('status-text');
+            const statusPulse = document.getElementById('status-pulse');
+            if (isGameOver) return;
+
+            if (isPaused) {
+                statusText.innerHTML = `<span class="text-amber-400 font-bold">PERMAINAN DIJEDA</span>`;
+                statusPulse.className = "w-2 h-2 rounded-full bg-amber-400";
+                return;
+            }
+
+            const turnName = turn === 'w' ? 'Putih' : 'Hitam';
+            const inCheck = isKingInCheck(turn);
+            
+            if (inCheck) {
+                statusText.innerHTML = `<span class="text-rose-400 font-bold animate-pulse"><i class="fa-solid fa-triangle-exclamation"></i> SKAK! Giliran ${turnName}</span>`;
+                statusPulse.className = "w-2 h-2 rounded-full bg-rose-500 animate-ping";
+            } else {
+                statusText.innerHTML = `Giliran: <strong class="text-blue-300">${turnName}</strong> Melangkah`;
+                statusPulse.className = "w-2 h-2 rounded-full bg-emerald-400 animate-ping";
+            }
+        }
+
+        function renderCapturedPieces() {
+            const topCaptured = document.getElementById('top-captured');
+            const bottomCaptured = document.getElementById('bottom-captured');
+
+            const isFlipped = (gameMode === 'bot' && playerSide === 'b');
+            const topColor = isFlipped ? 'w' : 'b';
+            const bottomColor = isFlipped ? 'b' : 'w';
+
+            topCaptured.innerHTML = capturedPieces[topColor].map(p => PIECES[p]).join(' ');
+            bottomCaptured.innerHTML = capturedPieces[bottomColor].map(p => PIECES[p]).join(' ');
+        }
+
+        function renderMoveHistory() {
+            const tbody = document.getElementById('move-history-body');
+            tbody.innerHTML = '';
+
+            historyLog.forEach((item, i) => {
+                const tr = document.createElement('tr');
+                tr.className = 'border-b border-slate-800/60 hover:bg-slate-800/40';
+                tr.innerHTML = `
+                    <td class="py-1 px-2 text-slate-500 font-sans">${i + 1}.</td>
+                    <td class="py-1 px-2 text-slate-200">${item.white}</td>
+                    <td class="py-1 px-2 text-slate-400">${item.black}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('move-count').innerText = `${historyLog.length} langkah`;
+            tbody.parentElement.parentElement.scrollTop = tbody.parentElement.parentElement.scrollHeight;
+        }
+
+        function updatePlayerBars() {
+            const isFlipped = (gameMode === 'bot' && playerSide === 'b');
+            const topName = document.getElementById('top-player-name');
+            const bottomName = document.getElementById('bottom-player-name');
+            const topIcon = document.getElementById('top-player-icon');
+            const bottomIcon = document.getElementById('bottom-player-icon');
+
+            if (gameMode === 'bot') {
+                if (playerSide === 'w') {
+                    topName.innerText = `Bot AI (Rating ${botRating})`;
+                    bottomName.innerText = 'Anda (Putih)';
+                    topIcon.className = botRating == 2000 ? 'fa-solid fa-crown text-yellow-400' : 'fa-solid fa-robot text-blue-400';
+                    bottomIcon.className = 'fa-solid fa-user text-white';
+                } else {
+                    topName.innerText = 'Anda (Hitam)';
+                    bottomName.innerText = `Bot AI (Rating ${botRating})`;
+                    topIcon.className = 'fa-solid fa-user text-white';
+                    bottomIcon.className = botRating == 2000 ? 'fa-solid fa-crown text-yellow-400' : 'fa-solid fa-robot text-blue-400';
+                }
+            } else {
+                topName.innerText = 'Pemain 2 (Hitam)';
+                bottomName.innerText = 'Pemain 1 (Putih)';
+                topIcon.className = 'fa-solid fa-user text-slate-300';
+                bottomIcon.className = 'fa-solid fa-user text-white';
+            }
+        }
+
+        function setGameMode(mode) {
+            gameMode = mode;
+            document.getElementById('mode-friend').className = mode === 'pvp' 
+                ? 'py-2.5 px-3 rounded-xl border text-xs font-semibold flex flex-col items-center gap-1 transition bg-blue-600 border-blue-500 text-white shadow-md'
+                : 'py-2.5 px-3 rounded-xl border border-slate-700 text-xs font-semibold flex flex-col items-center gap-1 transition bg-slate-700/50 hover:bg-slate-700 text-slate-300';
+
+            document.getElementById('mode-bot').className = mode === 'bot' 
+                ? 'py-2.5 px-3 rounded-xl border text-xs font-semibold flex flex-col items-center gap-1 transition bg-blue-600 border-blue-500 text-white shadow-md'
+                : 'py-2.5 px-3 rounded-xl border border-slate-700 text-xs font-semibold flex flex-col items-center gap-1 transition bg-slate-700/50 hover:bg-slate-700 text-slate-300';
+
+            document.getElementById('bot-settings').classList.toggle('hidden', mode !== 'bot');
+            initBoard();
+        }
+
+        function updateBotRating() {
+            botRating = parseInt(document.getElementById('bot-rating').value);
+            initBoard();
+        }
+
+        function setPlayerSide(side) {
+            playerSide = side;
+            document.getElementById('player-white').className = side === 'w'
+                ? 'py-2 rounded-lg border border-blue-500 bg-blue-600/30 text-white text-xs font-semibold flex items-center justify-center gap-2'
+                : 'py-2 rounded-lg border border-slate-700 bg-slate-900/60 text-slate-400 text-xs font-semibold flex items-center justify-center gap-2';
+
+            document.getElementById('player-black').className = side === 'b'
+                ? 'py-2 rounded-lg border border-blue-500 bg-blue-600/30 text-white text-xs font-semibold flex items-center justify-center gap-2'
+                : 'py-2 rounded-lg border border-slate-700 bg-slate-900/60 text-slate-400 text-xs font-semibold flex items-center justify-center gap-2';
+
+            initBoard();
+        }
+
+        function selectTheme(themeClass) {
+            if (themeClass === 'theme-nebula' && !is2000Unlocked) {
+                alert('Tema "Cosmic Nebula" terkunci! Kalahkan Bot AI 2000 Elo untuk membukanya.');
+                return;
+            }
+
+            const container = document.getElementById('board-container');
+            container.className = `relative w-full max-w-[500px] border-4 border-slate-800 shadow-2xl bg-slate-900 ${themeClass}`;
+
+            document.querySelectorAll('.theme-option').forEach(btn => {
+                btn.classList.remove('border-blue-500');
+                btn.classList.add('border-slate-700');
+            });
+            event.currentTarget.classList.add('border-blue-500');
+        }
+
+        function unlockBossTheme() {
+            is2000Unlocked = true;
+            const btn = document.getElementById('theme-btn-nebula');
+            btn.classList.remove('opacity-60', 'cursor-not-allowed');
+            btn.classList.add('cursor-pointer');
+            document.getElementById('nebula-lock-icon').className = 'fa-solid fa-lock-open text-emerald-400 ml-auto';
+            selectTheme('theme-nebula');
+        }
+
+        function undoMove() {
+            if (moveHistory.length === 0 || isGameOver) return;
+
+            const popState = () => {
+                const prev = moveHistory.pop();
+                board = prev.board;
+                turn = prev.turn;
+                castleRights = prev.castleRights;
+                enPassantTarget = prev.enPassantTarget;
+                capturedPieces = prev.capturedPieces;
+                lastMove = prev.lastMove;
+                if (historyLog.length > 0) {
+                    if (turn === 'b') {
+                        historyLog[historyLog.length - 1].black = '';
+                    } else {
+                        historyLog.pop();
+                    }
+                }
+            };
+
+            popState();
+            if (gameMode === 'bot' && moveHistory.length > 0 && turn !== playerSide) {
+                popState();
+            }
+
+            selectedSquare = null;
+            validMoves = [];
+            updateUI();
+        }
+
+        function resetGame() {
+            initBoard();
+        }
+
+        function resignGame() {
+            if (isGameOver) return;
+            isGameOver = true;
+            clearInterval(timerInterval);
+            const loser = turn === 'w' ? 'Putih' : 'Hitam';
+            const winner = turn === 'w' ? 'Hitam' : 'Putih';
+            showGameOverModal(`${winner} Menang!`, `${loser} menyerah.`);
+            AudioSys.playEnd();
+        }
+
+        function showGameOverModal(title, reason, showUnlock = false) {
+            document.getElementById('go-title').innerText = title;
+            document.getElementById('go-reason').innerText = reason;
+            document.getElementById('go-unlock-banner').classList.toggle('hidden', !showUnlock);
+            toggleModal('modal-gameover');
+        }
+
+        function toggleModal(id) {
+            document.getElementById(id).classList.toggle('hidden');
+        }
+
+        window.onload = () => {
+            initBoard();
+        };
+    </script>
+</body>
+</html>
