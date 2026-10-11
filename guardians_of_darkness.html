@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guardian of Darkness - Moogusverse Lore</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Times New Roman', Times, serif !important;
+        }
+
+        body {
+            background-color: #121212;
+            color: #d1d1d1;
+            line-height: 1.8;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Canvas Animasi Aluran Angin Biru */
+        #windCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background-color: #1e1e1e;
+            border: 1px solid #333333;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.85);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            z-index: 2; /* Berada di atas kanvas angin */
+        }
+
+        header {
+            background: linear-gradient(180deg, #2a2a2a 0%, #1e1e1e 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 2px solid #3a3a3a;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: #f0f0f0;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+
+        header p.quote {
+            font-style: italic;
+            color: #a0a0a0;
+            font-size: 1.15rem;
+        }
+
+        /* Navigation Tabs */
+        nav {
+            display: flex;
+            background-color: #181818;
+            border-bottom: 1px solid #333333;
+            overflow-x: auto;
+        }
+
+        .tab-button {
+            background-color: transparent;
+            color: #888888;
+            border: none;
+            outline: none;
+            padding: 15px 16px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+            flex: 1;
+            text-align: center;
+        }
+
+        .tab-button:hover {
+            color: #cccccc;
+            background-color: #222222;
+        }
+
+        .tab-button.active {
+            color: #ffffff;
+            background-color: #262626;
+            border-bottom: 3px solid #888888;
+            font-weight: bold;
+        }
+
+        /* Tab Content */
+        .content-section {
+            display: none;
+            padding: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            font-size: 2rem;
+            color: #e0e0e0;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #444444;
+            padding-bottom: 8px;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            color: #c0c0c0;
+            margin: 20px 0 10px 0;
+        }
+
+        p {
+            margin-bottom: 15px;
+            color: #b8b8b8;
+            text-align: justify;
+        }
+
+        ul {
+            margin: 15px 0 15px 30px;
+            color: #b8b8b8;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .dialogue-box {
+            background-color: #141414;
+            border-left: 4px solid #555555;
+            padding: 15px;
+            margin: 15px 0;
+            font-style: italic;
+            color: #d6d6d6;
+        }
+
+        .guardian-card {
+            background-color: #242424;
+            border: 1px solid #383838;
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .guardian-card h3 {
+            margin-top: 0;
+            color: #e0e0e0;
+            border-bottom: 1px dashed #444;
+            padding-bottom: 5px;
+        }
+
+        .subtitle {
+            font-style: italic;
+            color: #a0a0a0;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .pronouns {
+            font-size: 0.9rem;
+            color: #888888;
+            margin-bottom: 15px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #141414;
+            border-top: 1px solid #2a2a2a;
+            color: #666666;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.8rem; }
+            .tab-button { padding: 12px 10px; font-size: 0.85rem; }
+            .content-section { padding: 20px 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Canvas Animasi Aluran Angin Biru (Blue Wind Stream) -->
+<canvas id="windCanvas"></canvas>
+
+<div class="container">
+    <header>
+        <h1>Guardian of Darkness</h1>
+        <p class="quote">"The Fallen Wardens of Nature"</p>
+    </header>
+
+    <nav>
+        <button class="tab-button active" onclick="openTab(event, 'intro')">Introduction</button>
+        <button class="tab-button" onclick="openTab(event, 'vulture')">1. Vulture</button>
+        <button class="tab-button" onclick="openTab(event, 'lunar')">2. Crescent</button>
+        <button class="tab-button" onclick="openTab(event, 'flames')">3. Flames</button>
+        <button class="tab-button" onclick="openTab(event, 'sorrow')">4. Sorrow Sea</button>
+        <button class="tab-button" onclick="openTab(event, 'golden')">5. Golden Mercy</button>
+        <button class="tab-button" onclick="openTab(event, 'bonds')">Bonds & Manifest</button>
+    </nav>
+
+    <!-- INTRODUCTION -->
+    <div id="intro" class="content-section active">
+        <h2>The Fallen Wardens of Nature</h2>
+        <div class="dialogue-box">
+            "Before the Virtues fell, another order silently watched over Moogusverse. They were not rulers, nor heroes. They were the heartbeat of nature itself. Every breeze, every wave, every flame, every forest, and every moonlit sky carried their blessings. Yet when the corruption born from Unwavering Paradox Breaker spread across existence, even nature itself could no longer remain untouched."
+        </div>
+        <p>The Guardians of Darkness are the second great catastrophe of the modern Moogusverse timeline, appearing after the corruption of the Heroes of Virtue. Unlike the corrupted heroes, these beings were never guardians of civilization—they were guardians of nature itself.</p>
+        <p>For countless eras, they preserved the balance of the world, ensuring that every season, every tide, every sunrise, and every celestial movement followed their destined path. They rarely interfered with mortals, believing nature should exist freely.</p>
+
+        <h3>The Infection of Reality</h3>
+        <p>Everything changed when <strong>Unwavering Paradox Breaker</strong> appeared. His existence was never meant to happen. Rather than corrupting minds directly, he infected the laws of nature themselves.</p>
+        <ul>
+            <li>Wind began carrying hatred instead of freedom.</li>
+            <li>Fire became destruction instead of warmth.</li>
+            <li>Oceans mourned endlessly.</li>
+            <li>Forests grew beautiful yet deadly.</li>
+            <li>Even the moon abandoned its gentle light.</li>
+        </ul>
+        <p>The five Guardians resisted for centuries. Eventually... <em>they all fell.</em> Now, they are feared as the Guardians of Darkness, supernatural beings whose appearances signal disasters beyond ordinary understanding.</p>
+    </div>
+
+    <!-- 1. VULTURE IN THE DUSK -->
+    <div id="vulture" class="content-section">
+        <div class="guardian-card">
+            <h3>1. Vulture in the Dusk</h3>
+            <div class="subtitle">The Fallen Wind Guardian</div>
+            <div class="pronouns">Pronouns: He / They</div>
+
+            <h4>Introduction</h4>
+            <p>Once known simply as The Guardian of Wind, he represented freedom, movement, and hope. Every gentle breeze, migrating bird, and changing season existed because of his guidance.</p>
+            <p>Today... he is known only as Vulture in the Dusk. The moment daylight begins fading into dusk, his silhouette can often be seen circling above abandoned valleys, ruined kingdoms, or silent battlefields.</p>
+            <div class="dialogue-box">
+                Many believe seeing him means someone will never witness tomorrow's sunrise.
+            </div>
+
+            <h4>Appearance</h4>
+            <p>Vulture in the Dusk possesses enormous dark-purple wings whose feathers constantly dissolve into shadow-like winds. Torn cloaks flutter endlessly despite complete silence in the air.</p>
+            <p>His mask resembles a sharp bird skull with glowing violet eyes hidden beneath cracked horns. Large feathers trail behind him like storms waiting to happen, while countless black ravens silently accompany his flight. Unlike ordinary birds... his wings never make any sound.</p>
+
+            <h4>Lore & Personality</h4>
+            <p>As Guardian of Wind, he once traveled across the entire world every evening, carrying cool air that signaled the peaceful end of each day. After corruption, dusk itself became his prison. He can only fully manifest during dusk, when daylight and darkness overlap. This brief period weakens reality enough for him to cross between dimensions.</p>
+            <p>Every dusk grows slightly longer because of his presence. Many scholars fear one day dusk will never end.</p>
+            <p>Despite his terrifying appearance, he rarely attacks first. He quietly watches from above. Those who panic usually become lost inside endless storms. Those who remain calm may simply watch him disappear with the setting sun.</p>
+        </div>
+    </div>
+
+    <!-- 2. CRIMSON LUNAR CRESCENT MOON -->
+    <div id="lunar" class="content-section">
+        <div class="guardian-card">
+            <h3>2. Crimson Lunar Crescent Moon</h3>
+            <div class="subtitle">Founder of Stargazing</div>
+            <div class="pronouns">Pronouns: She / They</div>
+
+            <h4>Introduction</h4>
+            <p>Before corruption, she was one of Moogusverse's greatest scholars. She founded Stargazing, an ancient organization dedicated to studying stars, planets, constellations, black holes, forgotten galaxies, and cosmic history. Many of today's greatest astronomers learned through Stargazing. Ironically... the stars she loved became the reason she fell.</p>
+
+            <h4>Appearance</h4>
+            <p>She wears elegant crimson robes decorated with silver crescents and countless celestial symbols. Her enormous crescent-shaped halo constantly rotates behind her while fragments of shattered moons orbit around her body.</p>
+            <p>One eye shines bright white, while the other burns crimson during Blood Moons. Long flowing ribbons resemble galaxies stretching across space itself.</p>
+
+            <h4>Lore & Personality</h4>
+            <p>Originally she guided the moon, stars, eclipses, and every celestial event. While studying impossible constellations, she discovered fragments of Paradox Energy hidden beyond observable reality. Unwavering Paradox Breaker used that discovery to corrupt her knowledge.</p>
+            <p>Now... she creates Artificial Blood Moons. Unlike natural Blood Moons, these are completely unnatural celestial events. Whenever one appears... reality begins distorting. Gravity shifts. Constellations rearrange. Time becomes unreliable. Even Timewatcher refuses to observe those nights.</p>
+            <p>She speaks softly... almost kindly. But every sentence hides another meaning. She believes the universe should be rewritten under her own perfect sky.</p>
+        </div>
+    </div>
+
+    <!-- 3. FLAMES BEFORE THE DAWN -->
+    <div id="flames" class="content-section">
+        <div class="guardian-card">
+            <h3>3. Flames Before the Dawn</h3>
+            <div class="subtitle">The Eternal Inferno</div>
+            <div class="pronouns">Pronouns: He / They</div>
+
+            <h4>Introduction</h4>
+            <p>Once, fire represented warmth, life, civilization and rebirth. Now... fire exists only to consume. Flames Before the Dawn is considered the most physically destructive among the Guardians of Darkness.</p>
+
+            <h4>Appearance</h4>
+            <p>His armor appears forged entirely from volcanic stone. Cracks across his body glow with molten lava. His blazing cape resembles living fire stretching into the sky. His spear burns endlessly without producing smoke. Even his footsteps leave molten rock behind.</p>
+
+            <h4>Lore & Personality</h4>
+            <p>He resides beneath the largest active volcanoes in Moogusverse. Deep underground lies an enormous volcanic kingdom known as the Infernal Hollow. Its tunnels constantly reshape themselves through flowing magma. No map remains accurate for long.</p>
+            <p>Whenever volcanoes erupt unusually violently, people believe Flames Before the Dawn has awakened. His title comes from ancient legends. They say... if he ever climbs out before sunrise, the dawn itself will burn.</p>
+            <p>Unlike the others... he rarely speaks. His answers are delivered through eruptions.</p>
+        </div>
+    </div>
+
+    <!-- 4. SORROW SEA FROM THE DEEP -->
+    <div id="sorrow" class="content-section">
+        <div class="guardian-card">
+            <h3>4. Sorrow Sea from the Deep</h3>
+            <div class="subtitle">The Endless Ocean's Lament</div>
+            <div class="pronouns">Pronouns: She / They</div>
+
+            <h4>Introduction</h4>
+            <p>The oceans once symbolized life. Now... they remember only loss. Sorrow Sea from the Deep became the physical embodiment of every forgotten sorrow carried into the sea.</p>
+
+            <h4>Appearance</h4>
+            <p>Her flowing robes resemble endless ocean currents. Long blue hair drifts like water despite standing on solid ground. Tiny glowing fish swim through her cloak as though it were an ocean itself.</p>
+            <p>Her trident appears formed from abyssal crystal surrounded by dark tides. Her eyes contain no pupils—only endless deep water.</p>
+
+            <h4>Lore & Personality</h4>
+            <p>She never leaves the deepest parts of the ocean unless three conditions are fulfilled simultaneously:</p>
+            <ul>
+                <li>High Tide</li>
+                <li>Midnight</li>
+                <li>Bright Moonlight shining directly into the sea</li>
+            </ul>
+            <p>When those conditions align... she slowly rises from the abyss. The sea becomes perfectly calm. No wind blows. No birds sing. Ships that witness her often vanish without leaving wreckage. Many sailors believe the ocean is simply reclaiming forgotten souls.</p>
+            <p>She never becomes angry. She only feels endless sadness. Those who hear her singing begin remembering regrets they had long forgotten.</p>
+        </div>
+    </div>
+
+    <!-- 5. GOLDEN MERCY OF THE PRIMAL -->
+    <div id="golden" class="content-section">
+        <div class="guardian-card">
+            <h3>5. Golden Mercy of the Primal</h3>
+            <div class="subtitle">The Last Sacred Forest</div>
+            <div class="pronouns">Pronouns: He / They</div>
+
+            <h4>Introduction</h4>
+            <p>Among all Guardians... he was the origin of life itself. Every forest, flower, fruit and ancient tree carried fragments of his blessing. Without him... nature would never have existed.</p>
+
+            <h4>Appearance</h4>
+            <p>His body resembles polished white stone covered with living golden vines. Massive antler-like branches extend from his crown. Golden leaves constantly fall around him before disappearing into light. Emerald crystals bloom from his shoulders. Flowers blossom wherever he walks—only to wither moments later.</p>
+
+            <h4>Lore & Personality</h4>
+            <p>Golden Mercy of the Primal sleeps inside the Heartwood Sanctuary, a hidden forest that exists beyond ordinary maps. Finding it is nearly impossible. Travelers must enter an ancient forest during the early morning or midday, following rays of sunlight that seem to move unnaturally.</p>
+            <p>Deep within stands a colossal Golden World Tree, larger than mountains. Inside that sacred tree rests Golden Mercy. Few have ever reached him. Even fewer returned. The forest itself rearranges endlessly, hiding countless false paths. Hidden beneath the tree lies a forgotten chamber known only as The Root Memory, where echoes of the world's first forests still remain.</p>
+            <p>He rarely attacks. Instead... the forest does. Trees move. Roots awaken. Flowers release sleeping spores. Nature itself obeys him completely.</p>
+        </div>
+    </div>
+
+    <!-- BONDS & MANIFEST -->
+    <div id="bonds" class="content-section">
+        <h2>Relationship Between the Guardians</h2>
+        <p>Although they work toward the same unknown future, they rarely cooperate directly.</p>
+        <ul>
+            <li><strong>Vulture in the Dusk</strong> respects Crimson Lunar Crescent Moon, believing the stars understand destiny better than the wind.</li>
+            <li><strong>Crimson Lunar Crescent Moon</strong> often studies Golden Mercy of the Primal, fascinated that life still survives inside corruption.</li>
+            <li><strong>Flames Before the Dawn</strong> constantly clashes with Sorrow Sea from the Deep, as fire and ocean endlessly oppose one another.</li>
+            <li><strong>Golden Mercy of the Primal</strong> quietly mourns every Guardian, believing fragments of their original selves still remain beneath the corruption.</li>
+            <li><strong>Sorrow Sea from the Deep</strong> often sings forgotten songs that briefly calm even Flames Before the Dawn, though neither understands why.</li>
+        </ul>
+
+        <div class="dialogue-box">
+            None of them truly trust Unwavering Paradox Breaker. They obey only because his corruption has become intertwined with the very laws of nature. If his influence were ever broken, there is a possibility—however small—that the Guardians of Darkness could remember who they once were.
+        </div>
+
+        <h3>Manifestation Conditions</h3>
+        <p>Until that impossible day arrives, they remain living disasters, appearing only at the moments where nature itself grows unstable:</p>
+        <ul>
+            <li><strong>Vulture in the Dusk:</strong> During dusk, when day and night briefly become one.</li>
+            <li><strong>Crimson Lunar Crescent Moon:</strong> Beneath the unnatural Blood Moon she creates herself.</li>
+            <li><strong>Flames Before the Dawn:</strong> Within active volcanoes and vast caverns of living magma.</li>
+            <li><strong>Sorrow Sea from the Deep:</strong> At high tide, midnight, under a bright moon shining into the abyss.</li>
+            <li><strong>Golden Mercy of the Primal:</strong> Deep inside an ancient forest, where a colossal Golden World Tree hides from the outside world.</li>
+        </ul>
+        <p>Together, they are remembered not as monsters, but as the tragic proof that when the balance of nature is corrupted, even the oldest guardians cannot escape the darkness.</p>
+    </div>
+
+    <footer>
+        &copy; Moogusverse Lore Archive - Guardian of Darkness
+    </footer>
+</div>
+
+<!-- SCRIPT PENGATURAN TAB -->
+<script>
+    function openTab(evt, tabName) {
+        var i, contentSections, tabButtons;
+
+        contentSections = document.getElementsByClassName("content-section");
+        for (i = 0; i < contentSections.length; i++) {
+            contentSections[i].classList.remove("active");
+        }
+
+        tabButtons = document.getElementsByClassName("tab-button");
+        for (i = 0; i < tabButtons.length; i++) {
+            tabButtons[i].classList.remove("active");
+        }
+
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+    }
+</script>
+
+<!-- SCRIPT ANIMASI ALURAN ANGIN BIRU (BLUE WIND STREAM PARTICLES) -->
+<script>
+    const canvas = document.getElementById('windCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+    });
+
+    // Struktur partikel angin
+    class WindParticle {
+        constructor() {
+            this.reset();
+        }
+
+        reset() {
+            this.x = Math.random() * width - width * 0.2;
+            this.y = Math.random() * height;
+            this.length = Math.random() * 80 + 40;
+            this.speed = Math.random() * 2 + 1.2;
+            this.opacity = Math.random() * 0.4 + 0.1;
+            this.width = Math.random() * 1.5 + 0.5;
+            this.wave = Math.random() * 0.02;
+            this.angle = Math.random() * Math.PI * 2;
+        }
+
+        update() {
+            this.x += this.speed + 1;
+            this.angle += this.wave;
+            this.y += Math.sin(this.angle) * 0.5;
+
+            if (this.x > width + this.length) {
+                this.reset();
+                this.x = -this.length;
+            }
+        }
+
+        draw() {
+            ctx.beginPath();
+            let grad = ctx.createLinearGradient(this.x, this.y, this.x + this.length, this.y);
+            grad.addColorStop(0, 'rgba(0, 180, 255, 0)');
+            grad.addColorStop(0.5, `rgba(100, 210, 255, ${this.opacity})`);
+            grad.addColorStop(1, 'rgba(0, 150, 255, 0)');
+
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = this.width;
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(this.x + this.length, this.y + Math.sin(this.angle) * 3);
+            ctx.stroke();
+        }
+    }
+
+    const particleCount = 45;
+    const particles = [];
+    for (let i = 0; i < particleCount; i++) {
+        particles.push(new WindParticle());
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, width, height);
+        particles.forEach(p => {
+            p.update();
+            p.draw();
+        });
+        requestAnimationFrame(animate);
+    }
+
+    animate();
+</script>
+
+</body>
+</html>
